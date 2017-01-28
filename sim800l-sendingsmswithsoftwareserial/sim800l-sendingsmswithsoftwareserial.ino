@@ -36,11 +36,12 @@ void setup() {
   delay(1000);
  
   //Send new SMS command and message number
-  serialSIM800.write("AT+CMGS=\"07194XXXXX\"\r\n");
+  ////serialSIM800.write("AT+CMGS=\"07194XXXXX\"\r\n");
+  serialSIM800.write("AT+CMGS=\"04168262667\"\r\n");  //Working
   delay(1000);
    
   //Send SMS content
-  serialSIM800.write("SMS from SIM800l");
+  serialSIM800.write("SMS from SIM800l Prueba");
   delay(1000);
    
   //Send Ctrl+Z / ESC to denote SMS message is complete
@@ -52,6 +53,9 @@ void setup() {
  
 void loop() {
 }
+
+
+
 
 
 
