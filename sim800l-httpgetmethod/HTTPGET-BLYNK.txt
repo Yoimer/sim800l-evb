@@ -11,6 +11,7 @@ OK
 AT+HTTPREAD
 +HTTPREAD: 5
 false
+<<<<<<< HEAD
 OK
 AT+HTTPTERM 
 
@@ -52,3 +53,6 @@ OK
 AT+HTTPTERM
 OK
 
+=======
+OK
+>>>>>>> 1ec456f... Connection with BLYNK using API from just AT commands. It checks hardware network status
