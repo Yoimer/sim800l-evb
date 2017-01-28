@@ -1,0 +1,14 @@
+
+AT+HTTPINIT
+OK
+AT+HTTPPARA="URL","http://blynk-cloud.com/423b9ca014e54a1c892d4d22d2832f68/isHardwareConnected"
+OK
+AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,5
+
+AT+HTTPREAD
++HTTPREAD: 5
+false
+OK
