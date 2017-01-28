@@ -1,0 +1,37 @@
+Setup Complete!
+AT+SAPBR=3,1,"Contype", "GPRS" 
+
+OK
+AT+SAPBR=3,1,"APN","internet.digitel.ve"
+
+OK
+AT+SAPBR=1,1 
+
+OK
+AT+SAPBR=2,1  
+
++SAPBR: 1,1,"10.55.102.122"
+
+OK
+AT+HTTPINIT 
+
+OK
+AT+HTTPPARA="CID",1
+
+OK
+AT+HTTPPARA="URL","www.sim.com" 
+
+OK
+AT+HTTPACTION=0 
+
+OK
+
++HTTPACTION: 0,200,69
+AT+HTTPREAD 
+
++HTTPREAD: 69
+<script language=javascript>location.href='espcms/index.php'</script>
+OK
+AT+HTTPTERM 
+
+OK
