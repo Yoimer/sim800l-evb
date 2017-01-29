@@ -35,3 +35,20 @@ AT+HTTPREAD
 OK
 AT+HTTPTERM
 OK
+
+/********************Checking last value of Virtual Pin 1 (V9) on Raspberry Pi***************/
+
+AT+HTTPINIT
+OK
+AT+HTTPPARA="URL","http://blynk-cloud.com/423b9ca014e54a1c892d4d22d2832f68/get/V9"
+AT+HTTPACTION=0
+OK
+
++HTTPACTION: 0,200,6
+AT+HTTPREAD
++HTTPREAD: 6
+["24"]
+OK
+AT+HTTPTERM
+OK
+
