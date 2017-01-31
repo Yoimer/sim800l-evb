@@ -3,6 +3,10 @@ If phone number is not on phonebook (contacts) rejects anything from them.
 If so, turns ON LED on pin 13 on Arduino UNO board      */
 
 #include <SoftwareSerial.h>
+#include <gprs.h>
+
+// Timeout SIMCard to respond
+#define TIMEOUT    5000
 
 //SIM800 TX is connected to Arduino D8
 #define SIM800_TX_PIN 8
@@ -13,59 +17,34 @@ If so, turns ON LED on pin 13 on Arduino UNO board      */
 //Create software serial object to communicate with SIM800
 SoftwareSerial serialSIM800(SIM800_TX_PIN,SIM800_RX_PIN);
 
+// Create GPRS object to apply SIM commands with  SIM800
+GPRS gprs;
+
+
+
 void setup() {
+
+  /*****************************************************************Begining--Initialization Module***********************************************************************/
+  
   //Begin serial comunication with Arduino and Arduino IDE (Serial Monitor)
   Serial.begin(9600);
   while(!Serial);
-   
-  //Being serial communication with Arduino and SIM800
-  serialSIM800.begin(9600);
-  delay(1000);
-   
-  Serial.println("Boot Complete!");
-  Serial.println("Listing current phonebook on SIM card ...");
 
-  //Fetch currently phonebook
-  
-   serialSIM800.write("AT+CPBS=?\r\n");
-  delay(2000);
-  
-  serialSIM800.write("AT+CPBS=\"SM\"\r\n");
-  delay(2000);
-
-  serialSIM800.write("AT+CPBS=?\r\n");
-  delay(2000);
-
-  serialSIM800.write("AT+CPBR=1,10\r\n");
-  
-
-  
-}
-   
-  /*//Set SMS format to ASCII
-  serialSIM800.write("AT+CMGF=1\r\n");
+  Serial.println("Starting SIM800 SMS Command Processor");
+  gprs.preInit();
   delay(1000);
  
-  //Send new SMS command and message number
-  ////serialSIM800.write("AT+CMGS=\"07194XXXXX\"\r\n");
-  serialSIM800.write("AT+CMGS=\"04168262667\"\r\n");  //Working
-  delay(1000);
-   
-  //Send SMS content
-  serialSIM800.write("SMS from SIM800l Prueba");
-  delay(1000);
-   
-  //Send Ctrl+Z / ESC to denote SMS message is complete
-  serialSIM800.write((char)26);
-  delay(1000);
-     
-  Serial.println("SMS Sent!");    "+CMTI: \"SM\"" */
-
+  while(0 != gprs.init()) {
+      delay(1000);
+      Serial.print("init error\r\n");
+  } 
+  Serial.print("Initialization Succesfull!\r\n");
+  
+ /*****************************************************************End--Initialization Module***********************************************************************/
+  
+}
+  
 void loop() {
-
-  if(serialSIM800.available()){
-    Serial.write(serialSIM800.read());
-   }
 
 }
 
