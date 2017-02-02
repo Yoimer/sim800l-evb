@@ -17,9 +17,13 @@ If so, turns ON LED on pin 13 on Arduino UNO board      */
 //Create software serial object to communicate with SIM800
 SoftwareSerial serialSIM800(SIM800_TX_PIN,SIM800_RX_PIN);
 
+
 // Create GPRS object to apply SIM commands with  SIM800
 GPRS gprs;
 
+//Variable to hold last line of serial output from SIM800
+char currentLine[500] = "";
+int currentLineIndex = 0;
 
 
 void setup() {
@@ -39,17 +43,38 @@ void setup() {
       Serial.print("init error\r\n");
   } 
   Serial.print("Initialization Succesfull!\r\n");
-  
+
+
+ //Check current phonebook status
+ if(0 != gprs.sendCmdAndWaitForResp("AT+CPBR=1,10\r\n", "OK", TIMEOUT)) {
+    ERROR("ERROR:CPBR");
+    return;
+    } else {
+      Serial.print("Phonebook is ok\r\n");
+     }
+     
+// Send "list the content from phonebook command"
+
+gprs.sendCmd("AT+CPBR=1,10\r\n");
+
+////gprs.sendCmd("AT+CMGL=?\r\n");
+
+
  /*****************************************************************End--Initialization Module***********************************************************************/
   
 }
-  
+
 void loop() {
 
-}
 
-
-
-
-
+if(gprs.serialSIM800.available() > 0){
+    char lastCharRead = gprs.serialSIM800.read();
+    delay(2000);
+    Serial.print(lastCharRead);
+   }else {
+    Serial.println("No activity");
+    delay(2000);  
+    }
+  
+} 
 
