@@ -25,6 +25,9 @@ GPRS gprs;
 char currentLine[500] = "";
 int currentLineIndex = 0;
 
+// Receiving single characters
+char receivedChar;
+boolean newData = false;
 
 void setup() {
 
@@ -60,21 +63,41 @@ gprs.sendCmd("AT+CPBR=1,10\r\n");
 ////gprs.sendCmd("AT+CMGL=?\r\n");
 
 
- /*****************************************************************End--Initialization Module***********************************************************************/
-  
 }
+
+/*****************************************************************End--Initialization Module***********************************************************************/
 
 void loop() {
 
+  recvOneChar();    
+  showNewData();
+  
+  }
 
-if(gprs.serialSIM800.available() > 0){
+/*if(gprs.serialSIM800.available() > 0){
     char lastCharRead = gprs.serialSIM800.read();
     delay(2000);
     Serial.print(lastCharRead);
    }else {
     Serial.println("No activity");
     delay(2000);  
-    }
+    }*/
+
   
-} 
+void recvOneChar() {    
+  if (gprs.serialSIM800.available() > 0) {        
+    receivedChar = gprs.serialSIM800.read();
+    delay(2000);       
+    newData = true;    
+    }
+  }
+
+void showNewData() {    
+  if (newData == true) {        
+    Serial.print("This just in ... ");        
+    Serial.println(receivedChar);        
+    newData = false;    
+    }
+ }
+
 
