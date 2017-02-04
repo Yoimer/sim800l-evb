@@ -87,12 +87,10 @@ void loop() {
   
   }
 
-
 void recvWithEndMarker() {    
   static byte ndx = 0;    
   char endMarker = '\n';    
-  char rc;
-         
+  char rc;      
   while (gprs.serialSIM800.available() > 0 && newData == false) {        
     rc = gprs.serialSIM800.read();
     
@@ -111,21 +109,19 @@ void recvWithEndMarker() {
       stopper = lastLine.indexOf("129");
       if(lastLine.startsWith("+CPBR:")){
         //Serial.println("Yes");
-        Serial.println(firstComma );
-        Serial.println(stopper);
-        for(int i = (firstComma+1); i <=(stopper-2); ++i){
-         phoneNumber += lastLine[i];
-        }
-        Serial.println(phoneNumber);
-      }/*else{
-        Serial.print("No");
-      }*/
-      //Clear char array for next line of read
-      /*for( int i = 0; i < sizeof(receivedChars);  ++i ) {
+         //Serial.println(firstComma );
+         //Serial.println(stopper);
+         for(int i = (firstComma+1); i <=(stopper-2); ++i){
+          phoneNumber += lastLine[i];
+         }
+         Serial.println(phoneNumber);
+         phoneNumber = "\r\n";  // Cleans string for new line
+         
+        //Clear char array for next line of read
+       /*for( int i = 0; i < sizeof(receivedChars);  ++i ) {
        receivedChars[i] = (char)0;
       }*/
-
-      
+     } 
       ndx = 0;
       newData = true;
     }
@@ -134,7 +130,6 @@ void recvWithEndMarker() {
 
 void showNewData() {    
   if (newData == true) {        
-    //Serial.print("This just in ... ");
     ////Serial.println(receivedChars);          
     newData = false;    
    }
