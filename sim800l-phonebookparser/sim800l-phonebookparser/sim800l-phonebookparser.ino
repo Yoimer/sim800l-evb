@@ -7,10 +7,20 @@
 String  str = "hola"; 
 
 //String from Serial
-String sim = "+CPBR: 1,'121',129,'AtencionCliente'";
+////String sim = "+CPBR: 1,'121',129,'AtencionCliente'";
+
+///String sim = "+CPBR: 4,'2582',129,'Club Digitel'";
+
+String sim = "+CPBR: 5,'04168262667',129,'Yoimer'";
 
 //Srtring to compare with received SMS
 String compare = "";
+
+
+// Number registered on sim card
+
+String phoneNumber = "";
+
 
 //const int len = strq.length();
 
@@ -29,13 +39,17 @@ void setup() {
   delay(1000);
 
 
-  int value = str.indexOf('z');
+  int firstComma = sim.indexOf(',');
   int valor = sim.indexOf("AtencionCliente");  // Starts in 20
-  Serial.println(value);
+  Serial.println(firstComma);
   Serial.println(valor);
   if(sim.charAt(20) == 'A'){
     Serial.println("Yes");
   }
+
+  int stopper = sim.indexOf("129");
+  Serial.println(stopper);
+
 
   //Parser for name associated with a number (it is not standar, works only with "+CPBR: 1,'121',129,'AtencionCliente'";)
   // Next update will take only the number in any scenario.
@@ -51,11 +65,31 @@ void setup() {
     }
   }
 
- Serial.print(compare);   
+ Serial.println(compare);   
   //int secondComma = sim.indexOf(',' + firstComma);
  // Serial.println(secondComma);
 
+
+// Take only the phone number registed on the Sim Card.   //(firstComma+1); i <=(stopper-2);
+
+for(int i = (firstComma+2); i <=(stopper-3); ++i){
+  phoneNumber += sim[i];
+ }
+ Serial.println(phoneNumber);
+
+
+ /*if (phoneNumber == "04168262667"){
+  Serial.println("Yes");
+ }else{
+  Serial.println("No");
+ }*/
+
 }
+
+
+
+
+
 
 void loop() {
   
