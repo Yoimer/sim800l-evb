@@ -27,6 +27,21 @@ const byte numChars = 500;
 char receivedChars[numChars];   // an array to store the received data 
 boolean newData = false;
 
+//Initial values of variables to take just the phone number from phonebook
+
+// First comma on String from phonebook
+int firstComma = -1;
+
+// Stopper on String from phonebook
+int stopper = -1;
+
+
+// Variable where phone number will be saved
+
+String phoneNumber = "";
+
+
+
 void setup() {
 
   /*****************************************************************Begining--Initialization Module***********************************************************************/
@@ -90,6 +105,27 @@ void recvWithEndMarker() {
     }
     else {
       receivedChars[ndx] = '\0'; // terminate the string
+      //Processes only phone number
+      String lastLine = String(receivedChars);
+      firstComma = lastLine.indexOf(',');
+      stopper = lastLine.indexOf("129");
+      if(lastLine.startsWith("+CPBR:")){
+        //Serial.println("Yes");
+        Serial.println(firstComma );
+        Serial.println(stopper);
+        for(int i = (firstComma+1); i <=(stopper-2); ++i){
+         phoneNumber += lastLine[i];
+        }
+        Serial.println(phoneNumber);
+      }/*else{
+        Serial.print("No");
+      }*/
+      //Clear char array for next line of read
+      /*for( int i = 0; i < sizeof(receivedChars);  ++i ) {
+       receivedChars[i] = (char)0;
+      }*/
+
+      
       ndx = 0;
       newData = true;
     }
@@ -99,7 +135,7 @@ void recvWithEndMarker() {
 void showNewData() {    
   if (newData == true) {        
     //Serial.print("This just in ... ");
-    Serial.println(receivedChars);          
+    ////Serial.println(receivedChars);          
     newData = false;    
    }
  }
