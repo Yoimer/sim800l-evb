@@ -1,0 +1,10 @@
+AT+CPBR=1,10
++CPBR: 1,"121",129,"AtencionCliente"
++CPBR: 2,"123",129,"Consulta saldo"
++CPBR: 3,"124",129,"Buzon de voz412"
++CPBR: 4,"2582",129,"Club Digitel"
++CPBR: 5,"0416xxxxx7",129,"Yoimer"
++CPBR: 6,"0424xxxxx1",129,"Mom"
++CPBR: 7,"0212xxxxx3",129,"Home"
++CPBR: 8,"0416xxxxx9",129,"Brother"
+OK
