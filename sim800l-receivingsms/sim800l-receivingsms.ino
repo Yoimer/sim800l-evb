@@ -26,7 +26,7 @@ void setup() {
  
   //Set SMS mode to ASCII
   if(0 != gprs.sendCmdAndWaitForResp("AT+CMGF=1\r\n", "OK", TIMEOUT)) {
-    ERROR("ERROR:CNMI");
+    ERROR("ERROR:CMGF");
     return;
   }
    
