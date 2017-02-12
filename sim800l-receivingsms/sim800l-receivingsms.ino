@@ -50,6 +50,12 @@ int currentLineIndex = 0;
 //line of serial output is the actual SMS message content
 bool nextLineIsMessage = false;
 
+
+// Integers value to determine whether the number who sends SMS belongs the PhoneBook entry previously set.
+int firstComma = -1;
+int secondComma = -1;
+
+
 void loop() {
   //Write current status to LED pin
   digitalWrite(LED_PIN, ledStatus);
@@ -64,7 +70,26 @@ void loop() {
         //If last line read +CMT, New SMS Message Indications was received.
         //Hence, next line is the message content.
         if(lastLine.startsWith("+CMT:")){
-           
+          
+          firstComma = lastLine.indexOf(',');
+          Serial.println(firstComma);
+          secondComma = lastLine.indexOf(',', firstComma + 1);
+          Serial.println(secondComma);
+
+          /*If secondComma position is greater than 22 it means that the number was previously entered on PhoneBook
+             When not secondComma is just 22.
+              
+             Example:
+             +CMT: "04168262667","Yoimer","17/02/11,16:41:41-16"  secondComma position is 28
+             +CMT: "04168262667","","17/02/11,16:41:41-16"        secondComma position is 22 which means this number is not on SIMCard PhoneBook
+           */
+
+          if(secondComma > 22){
+            Serial.println("In Phonebook");
+          }else{
+            Serial.println("No in Phonebook");
+          }
+          
           Serial.println(lastLine);
           nextLineIsMessage = true;
         } else if (lastLine.length() > 0) {
