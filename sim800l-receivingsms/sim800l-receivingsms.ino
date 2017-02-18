@@ -85,6 +85,23 @@ int secondComma = -1;
 //Boolean to be set to true if number is found on phonebook
 bool isInPhonebook = false;
 
+//-----------------------------------------------------------------------------------------------------------//
+// Number of characters to be received
+const byte numChars = 35;
+
+// Variable to hold the received characters
+char receivedChars[numChars];
+
+//Boolean to be set to true when there is new data
+boolean newData = false;
+
+// Integer values to get size of receivedChars
+int len = -1;
+
+
+
+
+
 //--------------------------------End-Variable Declaration-------------------------------------------//
 
 
@@ -145,7 +162,113 @@ void setup() {
 
 //--------------------------------Start-Loop Section--------------------------------------------//
 
+
+//// Example 3 - Receive with start- and end-markers
+//
+//const byte numChars = 32;
+//char receivedChars[numChars];
+//
+//boolean newData = false;
+
 void loop() {
+    recvWithStartEndMarkers();
+    showNewData();
+}
+
+//--------------------------------End-Loop Section--------------------------------------------//
+
+
+//--------------------------------Start-Functions Section--------------------------------------//
+
+void recvWithStartEndMarkers() {
+    static boolean recvInProgress = false;            //"qwerty<asdfg>zxcvb"           +CMT: "04168262667","Yoimer","17/02/11,16:41:41-16"
+    static byte ndx = 0;
+    char startMarker = (' ');
+    char endMarker = (',');
+    ////char startMarker = '<';
+    ////char endMarker = '>';
+    char rc;
+ 
+    ////while (Serial.available() > 0 && newData == false) {
+        while (gprs.serialSIM800.available() > 0 && newData == false) {
+        ////rc = Serial.read();
+            rc = gprs.serialSIM800.read();
+
+        if (recvInProgress == true) {
+            if (rc != endMarker) {
+                receivedChars[ndx] = rc;
+                ///receivedChars[0] += rc;
+                ndx++;
+                if (ndx >= numChars) {
+                    ndx = numChars - 1;
+                }
+            }
+            else {
+                receivedChars[ndx] = '\0'; // terminate the string
+                recvInProgress = false;
+                ndx = 0;
+                newData = true;
+            }
+        }
+
+        else if (rc == startMarker) {
+            recvInProgress = true;
+        }
+    }
+}
+
+void showNewData() {
+    if (newData == true) {
+        //Serial.print("This just in ... ");
+        Serial.println(receivedChars);
+        len = strlen(receivedChars);
+        Serial.println(len);
+        Serial.println(receivedChars[0]);
+        Serial.println(receivedChars[1]);
+        Serial.println(receivedChars[2]);
+        Serial.println(receivedChars[3]);
+        Serial.println(receivedChars[4]);
+        Serial.println(receivedChars[5]);
+        Serial.println(receivedChars[6]);
+        Serial.println(receivedChars[7]);
+        Serial.println(receivedChars[8]);
+        Serial.println(receivedChars[9]);
+        Serial.println(receivedChars[10]);
+        Serial.println(receivedChars[11]);
+        Serial.println(receivedChars[12]);
+        /*Serial.println(receivedChars[13]);
+        Serial.println(receivedChars[14]);*/
+       }
+     
+        //gprs.sendSMS(receivedChars,"hello,world"); //define phone number and text
+        newData = false;
+    }
+
+
+//--------------------------------End-Functions Section--------------------------------------//
+
+
+/****************************************************************End of the code********************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*void loop() {
   //Write current status to LED pin
   digitalWrite(LED_PIN, ledStatus);
    
@@ -165,25 +288,26 @@ void loop() {
           secondComma = lastLine.indexOf(',', firstComma + 1);
           Serial.println(secondComma); //For debugging
 
-          /*If secondComma position is greater than 22 it means that the number was previously entered on PhoneBook
-             When not; secondComma is just 22.
+          //If secondComma position is greater than 22 it means that the number was previously entered on PhoneBook
+          //When not; secondComma is just 22.
               
-             Example:
-             +CMT: "04161587896","Yoimer","17/02/11,16:41:41-16"  secondComma position is 28
-             +CMT: "04161587896","","17/02/11,16:41:41-16"        secondComma position is 22 which means this number is not on SIMCard PhoneBook
-           */
+            // Example:
+             //+CMT: "04161587896","Yoimer","17/02/11,16:41:41-16"  secondComma position is 28
+            // +CMT: "04161587896","","17/02/11,16:41:41-16"        secondComma position is 22 which means this number is not on SIMCard PhoneBook
+           
 
           // If exists on Phonebook
           if(secondComma > 22){
             Serial.println("In Phonebook"); //For debugging
             isInPhonebook = true;
+            nextLineIsMessage = true;   //Goes here , for better organisation
             Serial.println(isInPhonebook);
           }else{
             Serial.println("Not in Phonebook"); //For debugging
           }
           
           Serial.println(lastLine);
-          nextLineIsMessage = true;
+          //nextLineIsMessage = true;
 
         } else if ((lastLine.length() > 0) && (isInPhonebook)) {
           if(nextLineIsMessage) {
@@ -200,10 +324,8 @@ void loop() {
             isInPhonebook = false;
           }
            
-        }/*else{
-          Serial.println("Not Allowed");
-        }*/
-         
+        }
+        
         //Clear char array for next line of read
         for( int i = 0; i < sizeof(currentLine);  ++i ) {
          currentLine[i] = (char)0;
@@ -213,7 +335,7 @@ void loop() {
       currentLine[currentLineIndex++] = lastCharRead;
     }
   }
-}
+}*/
 
 //--------------------------------End-Function Section-------------------------------------------//
 
