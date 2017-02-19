@@ -221,27 +221,65 @@ void showNewData() {
     if (newData == true) {
         //Serial.print("This just in ... ");
         Serial.println(receivedChars);
-        len = strlen(receivedChars);
-        Serial.println(len);
-        Serial.println(receivedChars[0]);
-        Serial.println(receivedChars[1]);
-        Serial.println(receivedChars[2]);
-        Serial.println(receivedChars[3]);
-        Serial.println(receivedChars[4]);
-        Serial.println(receivedChars[5]);
-        Serial.println(receivedChars[6]);
-        Serial.println(receivedChars[7]);
-        Serial.println(receivedChars[8]);
-        Serial.println(receivedChars[9]);
-        Serial.println(receivedChars[10]);
-        Serial.println(receivedChars[11]);
-        Serial.println(receivedChars[12]);
+        while(newData == true){
+          char *sendmsg = NULL;
+          static byte ndx = 0;
+          int i;
+          char rc;
+          char phoneChar[numChars];
+          static boolean recvInProgress = false;
+          char startMarker = (34); // Double quoute char
+          char endMarker = (34);  //Double quoute char
+          for(i = 0; i <= strlen(receivedChars); ++i){
+            rc = receivedChars[i];
+            if (recvInProgress == true){
+              if (rc != endMarker){
+                phoneChar[ndx] = rc;
+                ndx++;
+                if (ndx >= numChars){
+                  ndx = numChars - 1;
+                }
+              }else{
+                receivedChars[ndx] = '\0'; // terminate the string
+                phoneChar[ndx] = '\0'; // terminate the string
+                recvInProgress = false;
+                ndx = 0;
+                newData = true;
+              }
+            }
+            else if (rc == startMarker){
+              recvInProgress = true;
+            }
+          }
+
+        int len = strlen(phoneChar);
+        Serial.println(phoneChar);
+        sendmsg = phoneChar;
+        //Serial.println(sendmsg);
+        gprs.sendSMS(sendmsg,"hello,world"); //define phone number and text
+        newData = false;
+          
+        }
+//        len = strlen(receivedChars);
+//        Serial.println(len);
+//        Serial.println(receivedChars[0]);
+//        Serial.println(receivedChars[1]);
+//        Serial.println(receivedChars[2]);
+//        Serial.println(receivedChars[3]);
+//        Serial.println(receivedChars[4]);
+//        Serial.println(receivedChars[5]);
+//        Serial.println(receivedChars[6]);
+//        Serial.println(receivedChars[7]);
+//        Serial.println(receivedChars[8]);
+//        Serial.println(receivedChars[9]);
+//        Serial.println(receivedChars[10]);
+//        Serial.println(receivedChars[11]);
+//        Serial.println(receivedChars[12]);
         /*Serial.println(receivedChars[13]);
         Serial.println(receivedChars[14]);*/
        }
-     
         //gprs.sendSMS(receivedChars,"hello,world"); //define phone number and text
-        newData = false;
+        ////newData = false;
     }
 
 
