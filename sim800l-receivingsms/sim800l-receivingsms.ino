@@ -85,7 +85,7 @@ int secondComma = -1;
 //Boolean to be set to true if number is found on phonebook
 bool isInPhonebook = false;
 
-char phonebook[13];
+////char phonebook[13];
 
 char *number = NULL;
 
@@ -152,7 +152,7 @@ void setup() {
 void loop() {
   //Write current status to LED pin
   digitalWrite(LED_PIN, ledStatus);
-  ////char phonebook[13];
+  static char phonebook[13];
   int firstQuote = -1;
   int secondQuote = -1;
   int j = 0;
