@@ -132,6 +132,8 @@ void loop() {
   int secondComma = -1;
   int thirdComma = -1;
   int forthComma = -1;
+  int fifthComma = -1;
+  int len = -1;
   int j = 0;
   ////char *number = NULL;
 
@@ -160,9 +162,34 @@ void loop() {
           Serial.println(thirdComma);  //For debugging
           forthComma = lastLine.indexOf(',', thirdComma + 1);
           Serial.println(forthComma); //For debugging
+          fifthComma = lastLine.indexOf(',', forthComma + 1);
+          Serial.println(fifthComma); //For debugging
+
+          for (int i = forthComma+1; i < fifthComma; ++i) {
+           phonebook[j] = lastLine[i];
+           ++j;
+           }
+          phonebook[j] = '\0';
+          Serial.println(phonebook);
+          number = phonebook;  // number to send SMS later
+          len = strlen(phonebook); //lenght of phonebook string
+          Serial.println(len);  // For Debugging
+ 
+         // If exists on Phonebook
+          if (len > 2) {
+           Serial.println("In Phonebook"); //For debugging
+           isInPhonebook = true;
+           Serial.println(isInPhonebook);
+          }else {
+           Serial.println("Not in Phonebook"); //For debugging
+           isInPhonebook = false;
+          }
+
+
+
           
-          nextLineIsCall = false;
-          isInPhonebook = false;
+         nextLineIsCall = false;
+         isInPhonebook = false;
       }
 
       //Clear char array for next line of read
