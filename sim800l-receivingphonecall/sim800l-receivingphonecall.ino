@@ -1,9 +1,9 @@
 /* This piece of code receives phonecalls in order to turn off LED attached on PIN 13 on Arduino UNO board using
  SIM800L-EVB Module.
 
-If phone number is not on phonebook (contacts) the system rejects anything from them.
+If phone number is not on contact (contacts) the system rejects anything from them.
 
-if on phonebook turns off LED.
+if on contact turns off LED.
 
 
 /OJO/ CHANGES THIS! //////////
@@ -58,22 +58,25 @@ GPRS gprs;
 
 //--------------------------------Start-Variable Declaration-------------------------------------------//
 
-//Boolean to be set to false if number is on phonebook
+//Boolean to be set to false if number is on contact
 bool ledStatus = HIGH;
 
 ////Variable to hold last line of serial output from SIM800
 char currentLine[500] = "";
 int currentLineIndex = 0;
 
-//Integers value to determine whether the number who sends SMS belongs the PhoneBook entry previously set.
+//Integers value to determine whether the number who sends SMS belongs the contact entry previously set.
 int firstComma = -1;
 int secondComma = -1;
 
-//Boolean to be set to true if number is found on phonebook
-bool isInPhonebook = false;
+//Boolean to be set to true if number is found on contact
+bool isIncontact = false;
 
-// Variable to hold phonebook from call
-char phonebook[13];
+// Variable to hold contact from call
+char contact[13]; // changes this if needed (a contact name with more than 13 characters)
+
+// Variable to hold number from call
+char phonenumber[13];
 
 // Variable to send SMS
 char *number = NULL;
@@ -127,14 +130,16 @@ void setup() {
 void loop() {
   //Write current status to LED pin
   digitalWrite(LED_PIN, ledStatus);
-  static char phonebook[13];
+  static char contact[13];
   int firstComma = -1;
   int secondComma = -1;
   int thirdComma = -1;
   int forthComma = -1;
   int fifthComma = -1;
+  int firstQuote = -1;
+  int secondQuote = -1;
   int len = -1;
-  int j = 0;
+  ////int j = 0; Carefull
   ////char *number = NULL;
 
   //If there is serial output from SIM800
@@ -153,7 +158,12 @@ void loop() {
 
       } else if ((lastLine.length() > 0) && (nextLineIsCall)) {
           Serial.println(lastLine);
+
+     
+          //+CLIP: "04168262667",129,"",0,"Yoimer",0   Format received (When registered on SIM Card)
+          //+CLIP: "04168262667",129,"",0,"",0         Format received (When not registered on SIM Card)
           
+          // Determines whether call number is a contact
           firstComma = lastLine.indexOf(',');
           Serial.println(firstComma);  //For debugging
           secondComma = lastLine.indexOf(',', firstComma + 1);
@@ -163,38 +173,65 @@ void loop() {
           forthComma = lastLine.indexOf(',', thirdComma + 1);
           Serial.println(forthComma); //For debugging
           fifthComma = lastLine.indexOf(',', forthComma + 1);
-          Serial.println(fifthComma); //For debugging
+          Serial.println(fifthComma); //For debuggin
 
+          // Extracts contact
+          int j = 0;
           for (int i = forthComma+1; i < fifthComma; ++i) {
-           phonebook[j] = lastLine[i];
+           contact[j] = lastLine[i];
            ++j;
            }
-          phonebook[j] = '\0';
-          Serial.println(phonebook);
-          number = phonebook;  // number to send SMS later
-          len = strlen(phonebook); //lenght of phonebook string
+          contact[j] = '\0'; // Contact as a full string
+          
+          Serial.println(contact); //For Debugging        CONTACT HAS TO BE CLEANED LATER
+          
+          ///number = contact;  // number to send SMS later
+          
+          len = strlen(contact); //lenght of contact string
           Serial.println(len);  // For Debugging
- 
-         // If exists on Phonebook
+          
+         // If exists on contact
           if (len > 2) {
-           Serial.println("In Phonebook"); //For debugging
-           isInPhonebook = true;
-           Serial.println(isInPhonebook);
+           Serial.println("In contact"); //For debugging
+           isIncontact = true;
+           Serial.println(isIncontact);
           }else {
-           Serial.println("Not in Phonebook"); //For debugging
-           isInPhonebook = false;
+           Serial.println("Not in contact"); //For debugging
+           isIncontact = false;
           }
 
+          // Get phone number
+          firstQuote = lastLine.indexOf(34); // ASCII character for quote "
+          Serial.println(firstQuote);  //For debugging
+          secondQuote = lastLine.indexOf(34, firstQuote + 1);
+          Serial.println(secondQuote); //For debugging
 
-
+          // Extracts phone number
+          j = 0;
+          for (int i = firstQuote+1; i < secondQuote; ++i) {
+           phonenumber[j] = lastLine[i];
+           ++j;
+           }
+          phonenumber[j] = '\0'; // phone number as a full string
+          number = phonenumber;
+          Serial.println(phonenumber); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
+       
+          if(isIncontact){
+            ledStatus = 0;
+            digitalWrite(LED_PIN, ledStatus);
+            gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
+       }
+          
           
          nextLineIsCall = false;
-         isInPhonebook = false;
+         isIncontact = false;
       }
 
       //Clear char array for next line of read
       for ( int i = 0; i < sizeof(currentLine);  ++i ) {
         currentLine[i] = (char)0;
+//        contact[i] = (char)0;
+//        phonenumber[i] = (char)0;
       }
       currentLineIndex = 0;
     } else {
@@ -212,12 +249,12 @@ void loop() {
 //      Serial.println(secondComma); //For debugging
 //
 //       for (int i = firstComma+1; i < secondComma; ++i) {
-//        phonebook[j] = lastLine[i];
+//        contact[j] = lastLine[i];
 //          ++j;
 //        }
-//       phonebook[j] = '\0';
-//       Serial.println(phonebook);
-//       number = phonebook;
+//       contact[j] = '\0';
+//       Serial.println(contact);
+//       number = contact;
 
 
 //End Sending SMS Section
