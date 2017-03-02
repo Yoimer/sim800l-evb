@@ -79,7 +79,7 @@ char phonebook[13];
 char *number = NULL;
 
 ////Boolean to be set to true if call notificaion was found and next
-bool nextLineIsMessage = false;
+bool nextLineIsCall = false;
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -125,43 +125,50 @@ void setup() {
 
 
 void loop() {
-
+  //Write current status to LED pin
+  digitalWrite(LED_PIN, ledStatus);
+  static char phonebook[13];
   int firstQuote = -1;
   int secondQuote = -1;
   int j = 0;
-  bool firstPart = false;
-  bool secondPart = false;
-  bool thirdPart = false;
-
+  ////char *number = NULL;
 
   //If there is serial output from SIM800
-  if (gprs.serialSIM800.available() > 0) {
+  if (gprs.serialSIM800.available()) {
     char lastCharRead = gprs.serialSIM800.read();
-    //Serial.println(lastCharRead);
     //Read each character from serial output until \r or \n is reached (which denotes end of line)
     if (lastCharRead == '\r' || lastCharRead == '\n') {
       String lastLine = String(currentLine);
+
+      //If last line read +CMT, New SMS Message Indications was received.
+      //Hence, next line is the message content.
       if (lastLine.startsWith("RING")) {
-        firstPart = true;
-        Serial.println("HHHH");
-    } 
-  }else {
-    currentLine[currentLineIndex++] = lastCharRead;
+
+        Serial.println(lastLine);
+        nextLineIsCall = true;
+
+      } else if ((lastLine.length() > 0) && (nextLineIsCall)) {
+        if (nextLineIsCall) {
+          Serial.println(lastLine);
+          
+          nextLineIsCall = false;
+          isInPhonebook = false;
+        }
+
+      }/*else{
+          Serial.println("Not Allowed");
+        }*/
+
+      //Clear char array for next line of read
+      for ( int i = 0; i < sizeof(currentLine);  ++i ) {
+        currentLine[i] = (char)0;
+      }
+      currentLineIndex = 0;
+    } else {
+      currentLine[currentLineIndex++] = lastCharRead;
+    }
   }
- }
-} 
-
-//       if (secondComma > 22) {
-//         Serial.println("In Phonebook"); //For debugging
-//         isInPhonebook = true;
-//         Serial.println(isInPhonebook);
-//        } else {
-//         Serial.println("Not in Phonebook"); //For debugging
-//         isInPhonebook = false;
-//       }
-//      }
-
-
+}
 
 
 //Start Sending SMS Section
