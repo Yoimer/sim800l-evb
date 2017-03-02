@@ -128,8 +128,10 @@ void loop() {
   //Write current status to LED pin
   digitalWrite(LED_PIN, ledStatus);
   static char phonebook[13];
-  int firstQuote = -1;
-  int secondQuote = -1;
+  int firstComma = -1;
+  int secondComma = -1;
+  int thirdComma = -1;
+  int forthComma = -1;
   int j = 0;
   ////char *number = NULL;
 
@@ -148,16 +150,20 @@ void loop() {
         nextLineIsCall = true;
 
       } else if ((lastLine.length() > 0) && (nextLineIsCall)) {
-        if (nextLineIsCall) {
           Serial.println(lastLine);
+          
+          firstComma = lastLine.indexOf(',');
+          Serial.println(firstComma);  //For debugging
+          secondComma = lastLine.indexOf(',', firstComma + 1);
+          Serial.println(secondComma); //For debugging
+          thirdComma = lastLine.indexOf(',', secondComma + 1);
+          Serial.println(thirdComma);  //For debugging
+          forthComma = lastLine.indexOf(',', thirdComma + 1);
+          Serial.println(forthComma); //For debugging
           
           nextLineIsCall = false;
           isInPhonebook = false;
-        }
-
-      }/*else{
-          Serial.println("Not Allowed");
-        }*/
+      }
 
       //Clear char array for next line of read
       for ( int i = 0; i < sizeof(currentLine);  ++i ) {
@@ -173,12 +179,12 @@ void loop() {
 
 //Start Sending SMS Section
 
-//       firstQuote = lastLine.indexOf(34); //ASCII code for ""
-//       Serial.println(firstQuote);  //For debugging
-//       secondQuote = lastLine.indexOf(34, firstQuote + 1);
-//      Serial.println(secondQuote); //For debugging
+//       firstComma = lastLine.indexOf(34); //ASCII code for ""
+//       Serial.println(firstComma);  //For debugging
+//       secondComma = lastLine.indexOf(34, firstComma + 1);
+//      Serial.println(secondComma); //For debugging
 //
-//       for (int i = firstQuote+1; i < secondQuote; ++i) {
+//       for (int i = firstComma+1; i < secondComma; ++i) {
 //        phonebook[j] = lastLine[i];
 //          ++j;
 //        }
