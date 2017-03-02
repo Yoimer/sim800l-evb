@@ -111,13 +111,12 @@ void setup() {
     delay(1000);
     Serial.print("init error\r\n");
   }
-  
+
   //Set call notification
   if (0 != gprs.sendCmdAndWaitForResp("AT+CLIP=1\r\n", "OK", TIMEOUT)) {
-  ERROR("ERROR:CLIP");
-  return;
+    ERROR("ERROR:CLIP");
+    return;
   }
-
   Serial.println("Init success");
 
 }
@@ -130,35 +129,39 @@ void loop() {
   int firstQuote = -1;
   int secondQuote = -1;
   int j = 0;
-  
+  bool firstPart = false;
+  bool secondPart = false;
+  bool thirdPart = false;
+
+
   //If there is serial output from SIM800
-  if (gprs.serialSIM800.available()) {
+  if (gprs.serialSIM800.available() > 0) {
     char lastCharRead = gprs.serialSIM800.read();
+    //Serial.println(lastCharRead);
     //Read each character from serial output until \r or \n is reached (which denotes end of line)
     if (lastCharRead == '\r' || lastCharRead == '\n') {
       String lastLine = String(currentLine);
-      Serial.print(lastLine);
-      if (lastLine.startsWith("RING")){
-        ledStatus = 0;
-        digitalWrite(LED_PIN, ledStatus);
-      }
+      if (lastLine.startsWith("RING")) {
+        firstPart = true;
+        Serial.println("HHHH");
+    } 
   }else {
-      currentLine[currentLineIndex++] = lastCharRead; 
+    currentLine[currentLineIndex++] = lastCharRead;
   }
  }
-}
-      
+} 
+
 //       if (secondComma > 22) {
 //         Serial.println("In Phonebook"); //For debugging
 //         isInPhonebook = true;
 //         Serial.println(isInPhonebook);
 //        } else {
 //         Serial.println("Not in Phonebook"); //For debugging
-//         isInPhonebook = false;     
+//         isInPhonebook = false;
 //       }
 //      }
-    
-  
+
+
 
 
 //Start Sending SMS Section
@@ -178,5 +181,5 @@ void loop() {
 
 
 //End Sending SMS Section
-       
+
 
