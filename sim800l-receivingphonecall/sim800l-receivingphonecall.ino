@@ -112,7 +112,7 @@ void setup() {
   //Write current status to LED pin
   digitalWrite(LED_PIN, ledStatus);
 
-  Serial.println("Starting SIM800 SMS Command Processor");
+  Serial.println("Starting SIM800 Call Command Processor");
   gprs.preInit();
   delay(1000);
 
