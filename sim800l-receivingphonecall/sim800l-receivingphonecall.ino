@@ -91,10 +91,6 @@ int len = -1;
 int j = -1;
 int i = -1;
 
-
-
-
-
 //--------------------------------End-Variable Declaration-------------------------------------------//
 
 
@@ -163,100 +159,6 @@ void loop()
   }
 }
 
-//      String lastLine = String(currentLine);
-//
-//      //If last line read +CMT, New SMS Message Indications was received.
-//      //Hence, next line is the message content.
-//      if (lastLine.startsWith("RING")) {
-//
-//        Serial.println(lastLine);
-//        nextLineIsCall = true;
-//
-//      } else if ((lastLine.length() > 0) && (nextLineIsCall)) {
-//          Serial.println(lastLine);
-//
-//
-//          //+CLIP: "04168262667",129,"",0,"Yoimer",0   Format received (When registered on SIM Card)
-//          //+CLIP: "04168262667",129,"",0,"",0         Format received (When not registered on SIM Card)
-//
-//          // Determines whether call number is a contact
-//          firstComma = lastLine.indexOf(',');
-//          Serial.println(firstComma);  //For debugging
-//          secondComma = lastLine.indexOf(',', firstComma + 1);
-//          Serial.println(secondComma); //For debugging
-//          thirdComma = lastLine.indexOf(',', secondComma + 1);
-//          Serial.println(thirdComma);  //For debugging
-//          forthComma = lastLine.indexOf(',', thirdComma + 1);
-//          Serial.println(forthComma); //For debugging
-//          fifthComma = lastLine.indexOf(',', forthComma + 1);
-//          Serial.println(fifthComma); //For debuggin
-//
-//          // Extracts contact
-//          ///int j = 0;
-//          j = 0;
-//          for (int i = forthComma+1; i < fifthComma; ++i) {
-//           contact[j] = lastLine[i];
-//           ++j;
-//           }
-//          contact[j] = '\0'; // Contact as a full string
-//
-//          Serial.println(contact); //For Debugging        CONTACT HAS TO BE CLEANED LATER
-//
-//          ///number = contact;  // number to send SMS later
-//
-//          len = strlen(contact); //lenght of contact string
-//          Serial.println(len);  // For Debugging
-//
-//         // If exists on contact
-//          if (len > 2) {
-//           Serial.println("In contact"); //For debugging
-//           isIncontact = true;
-//           Serial.println(isIncontact);
-//          }else {
-//           Serial.println("Not in contact"); //For debugging
-//           isIncontact = false;
-//          }
-//
-//          // Get phone number
-//          firstQuote = lastLine.indexOf(34); // ASCII character for quote "
-//          Serial.println(firstQuote);  //For debugging
-//          secondQuote = lastLine.indexOf(34, firstQuote + 1);
-//          Serial.println(secondQuote); //For debugging
-//
-//          // Extracts phone number
-//          j = 0;
-//          for (int i = firstQuote+1; i < secondQuote; ++i) {
-//           phonenumber[j] = lastLine[i];
-//           ++j;
-//           }
-//          phonenumber[j] = '\0'; // phone number as a full string
-//          number = phonenumber;
-//          Serial.println(phonenumber); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
-//
-//          if(isIncontact){
-//            ledStatus = 0;
-//            digitalWrite(LED_PIN, ledStatus);
-//            gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
-//       }
-//
-//
-//         nextLineIsCall = false;
-//         isIncontact = false;
-//      }
-//
-//      //Clear char array for next line of read
-//      for ( int i = 0; i < sizeof(currentLine);  ++i ) {
-//        currentLine[i] = (char)0;
-////        contact[i] = (char)0;
-////        phonenumber[i] = (char)0;
-//      }
-//      currentLineIndex = 0;
-//    } else {
-//      currentLine[currentLineIndex++] = lastCharRead;
-//    }
-//  }
-//}
-
 //--------------------------------End-loop Section----------------------------------------------//
 
 
@@ -283,52 +185,97 @@ void endoflinereached()
   if (lastLine.startsWith("RING"))
   {
     Serial.println(lastLine);
-    ////nextLineIsCall = true;
     nextValidLineIsCall = true;
-    //lastlineisRING();
   }
   else if ((lastLine.length() > 0) && (nextValidLineIsCall))
   {
     lastlineisCALL();
   }
   
-
-   CleanCurrentLine();
-   
+  CleanCurrentLine();
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 void lastlineisCALL()
 {
   if (nextValidLineIsCall)
   {
-     Serial.println(lastLine);
-     nextValidLineIsCall = false;
-     //nextLineIsCall = false;
-     //isInPhonebook = false;
+    Serial.println(lastLine);
+
+    // Parsing lastLine to determine registration on SIM card
+    firstComma = lastLine.indexOf(',');
+    Serial.println(firstComma);  //For debugging
+    secondComma = lastLine.indexOf(',', firstComma + 1);
+    Serial.println(secondComma); //For debugging
+    thirdComma = lastLine.indexOf(',', secondComma + 1);
+    Serial.println(thirdComma);  //For debugging
+    forthComma = lastLine.indexOf(',', thirdComma + 1);
+    Serial.println(forthComma); //For debugging
+    fifthComma = lastLine.indexOf(',', forthComma + 1);
+    Serial.println(fifthComma); //For debugging
+
+    //Extracts contact
+    j = 0;
+    for (int i = forthComma + 1; i < fifthComma; ++i) {
+      contact[j] = lastLine[i];
+      ++j;
+    }
+    contact[j] = '\0'; // Contact as a full string
+    Serial.println(contact); //For Debugging
+
+    len = strlen(contact); //lenght of contact string
+    Serial.println(len);  // For Debugging
+
+    // If exists on contact
+    if (len > 2)
+    {
+      Serial.println("In contact"); //For debugging
+      isIncontact = true;
+      Serial.println(isIncontact);
+    } 
+    else 
+    {
+      Serial.println("Not in contact"); //For debugging
+      isIncontact = false;
+    }
+
+   // If registered turns off led on pin 13. 
+   //If not, just do nothing. (In a later release the action of turning off the led will notify the caller via SMS
+   // that the action was committed succesfully)
+   
+    if (isIncontact) 
+    {
+      ledStatus = 0;
+      digitalWrite(LED_PIN, ledStatus);
+    }
+    
+    CleanContactArray();
+    nextValidLineIsCall = false;
   }
 
-
- CleanCurrentLine();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 void CleanCurrentLine()
 {
-    //Clear char array for next line of read
-    for ( int i = 0; i < sizeof(currentLine);  ++i ) 
-    {
-        currentLine[i] = (char)0;
-    }
-    
-    currentLineIndex = 0;    
+  //Clear char array for next line of read
+  for ( int i = 0; i < sizeof(currentLine);  ++i )
+  {
+    currentLine[i] = (char)0;
+  }
+  currentLineIndex = 0;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
 
+void CleanContactArray()
+{
+  //Clear char array for next reading
+  for ( int i = 0; i < sizeof(contact);  ++i )
+  {
+    contact[i] = (char)0;
+  }
+}
 
-
-
-
-
+//--------------------------------End Functions Section----------------------------------------------//
