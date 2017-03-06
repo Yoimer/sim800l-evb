@@ -292,12 +292,9 @@ void endoflinereached()
     lastlineisCALL();
   }
   
-  //Clear char array for next line of read
-  for ( int i = 0; i < sizeof(currentLine);  ++i ) 
-  {
-     currentLine[i] = (char)0;
-  }
-  currentLineIndex = 0;
+
+   CleanCurrentLine();
+   
 }
 
 
@@ -312,16 +309,22 @@ void lastlineisCALL()
      //isInPhonebook = false;
   }
 
-  //Clear char array for next line of read
-  for ( int i = 0; i < sizeof(currentLine);  ++i ) 
-  {
-     currentLine[i] = (char)0;
-  }
-  currentLineIndex = 0;
- 
+
+ CleanCurrentLine();
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+void CleanCurrentLine()
+{
+    //Clear char array for next line of read
+    for ( int i = 0; i < sizeof(currentLine);  ++i ) 
+    {
+        currentLine[i] = (char)0;
+    }
+    
+    currentLineIndex = 0;    
+}
 
 
 
