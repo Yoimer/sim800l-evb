@@ -76,6 +76,13 @@ char *number = NULL;
 //bool nextLineIsCall = false;
 bool nextValidLineIsCall = false;
 
+////Boolean to be set to true if message notificaion was found and next
+////line of serial output is the actual SMS message content
+bool nextLineIsMessage = false;
+
+//Boolean to be set to true if number is found on phonebook
+bool isInPhonebook = false;
+
 // String which holds the last line read from Serial activitiy
 String lastLine = "";
 
@@ -116,16 +123,33 @@ void setup() {
   gprs.preInit();
   delay(1000);
 
-  while (0 != gprs.init()) {
+  while (0 != gprs.init())
+  {
     delay(1000);
     Serial.print("init error\r\n");
   }
 
   //Set call notification
-  if (0 != gprs.sendCmdAndWaitForResp("AT+CLIP=1\r\n", "OK", TIMEOUT)) {
+  if (0 != gprs.sendCmdAndWaitForResp("AT+CLIP=1\r\n", "OK", TIMEOUT))
+  {
     ERROR("ERROR:CLIP");
     return;
   }
+
+  //Set SMS mode to ASCII
+  if (0 != gprs.sendCmdAndWaitForResp("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:CMGF");
+    return;
+  }
+
+  //Start listening to New SMS Message Indications
+  if (0 != gprs.sendCmdAndWaitForResp("AT+CNMI=1,2,0,0,0\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:CNMI");
+    return;
+  }
+
   Serial.println("Init success");
 
 }
@@ -169,7 +193,8 @@ void endoflinereached()
 {
   lastLine = String(currentLine);
 
-  // If lastline reads RING, New Call Indication was received.
+  //-----------------------Call---------------------------//
+  // If lastLine reads RING, New Call Indication was received.
   // Hence, the THIRD LINE is the caller information.
 
   // The whole string will be something like this if caller IS registered on SIM Card:
@@ -182,21 +207,58 @@ void endoflinereached()
   //     (Second Line is empty)
   //+CLIP: "04168262667",129,"",0,"",0 (Third Line)
 
-  if (lastLine.startsWith("RING"))
+  //----------------------SMS-------------------------------------//
+  //If lastLine reads +CMT, New SMS Message Indications was received.
+  //Hence, next line is the message content.
+
+  if (lastLine.startsWith("RING"))                                   // New incoming call
   {
     Serial.println(lastLine);
     nextValidLineIsCall = true;
   }
-  else if ((lastLine.length() > 0) && (nextValidLineIsCall))
+  else if ((lastLine.length() > 0) && (nextValidLineIsCall))        // Rejects any empty line
   {
-    lastlineisCALL();
+    LastLineIsCLIP();
   }
-  
+  else if (lastLine.startsWith("+CMT:"))                           // New incoming SMS
+  {
+    Serial.println(lastLine);
+    nextLineIsMessage = true;
+
+    // Parsing lastLine to determine registration on SIM card
+    firstComma = lastLine.indexOf(',');
+    Serial.println(firstComma);  //For debugging
+    secondComma = lastLine.indexOf(',', firstComma + 1);
+    Serial.println(secondComma); //For debugging
+
+    //If secondComma position is greater than 22,
+    //it means that the number was previously entered on PhoneBook
+    // When not; secondComma is just 22.
+
+    //Example:
+    //+CMT: "04161587896","Yoimer","17/02/11,16:41:41-16"  secondComma position is 28
+
+    // +CMT: "04161587896","","17/02/11,16:41:41-16"
+    // secondComma position is 22 which means this number is not on SIMCard PhoneBook
+
+
+    // HERE GOES the extraction of mobile number code
+
+
+    
+  }
+  else if ((lastLine.length() > 0) && (nextLineIsMessage))       // Rejects any empty line
+  {
+    //LastLineIsCLIP();
+    LastLineIsCMT();
+    Serial.println("Ready to process");
+  }
+
   CleanCurrentLine();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-void lastlineisCALL()
+void LastLineIsCLIP()
 {
   if (nextValidLineIsCall)
   {
@@ -232,23 +294,23 @@ void lastlineisCALL()
       Serial.println("In contact"); //For debugging
       isIncontact = true;
       Serial.println(isIncontact);
-    } 
-    else 
+    }
+    else
     {
       Serial.println("Not in contact"); //For debugging
       isIncontact = false;
     }
 
-   // If registered turns off led on pin 13. 
-   //If not, just do nothing. (In a later release the action of turning off the led will notify the caller via SMS
-   // that the action was committed succesfully)
-   
-    if (isIncontact) 
+    // If registered turns off led on pin 13.
+    //If not, just do nothing. (In a later release the action of turning off the led will notify the caller via SMS
+    // that the action was committed succesfully)
+
+    if (isIncontact)
     {
       ledStatus = 0;
       digitalWrite(LED_PIN, ledStatus);
     }
-    
+
     CleanContactArray();
     nextValidLineIsCall = false;
   }
@@ -277,5 +339,51 @@ void CleanContactArray()
     contact[i] = (char)0;
   }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void LastLineIsCMT()
+{
+  if (nextLineIsMessage)
+  {
+    Serial.println(lastLine);
+
+    
+    // If exists on Phonebook
+    if (secondComma > 22)
+    {
+      Serial.println("In Phonebook"); //For debugging
+      isInPhonebook = true;
+      Serial.println(isInPhonebook);
+    }
+    else
+    {
+      Serial.println("Not in Phonebook"); //For debugging
+      isInPhonebook = false;
+    }
+
+    //if on phonebook ---------------------------
+
+    // If SMS contains LED ON or LED OFF or #WhiteList
+    if (lastLine.indexOf("LED ON") >= 0)
+    {
+      ledStatus = 1;   // Turns ON LED
+    }
+    else if (lastLine.indexOf("LED OFF") >= 0)
+    {
+      ledStatus = 0;  // Turns OFF LED
+    }
+    else if (lastLine.indexOf("#WhiteList"))
+    {
+      // Go to WhiteList Routine
+      Serial.println("Go to WhiteList Routine");
+    }
+
+    CleanCurrentLine();
+    nextLineIsMessage = false;
+
+  }
+}
+
+
 
 //--------------------------------End Functions Section----------------------------------------------//
