@@ -243,9 +243,10 @@ void endoflinereached()
 
 
     // HERE GOES the extraction of mobile number code
+      ExtractPhoneNumber();
+      Serial.println(number);
+     
 
-
-    
   }
   else if ((lastLine.length() > 0) && (nextLineIsMessage))       // Rejects any empty line
   {
@@ -287,6 +288,29 @@ void LastLineIsCLIP()
 
     len = strlen(contact); //lenght of contact string
     Serial.println(len);  // For Debugging
+
+    // HERE GOES the extraction of mobile number code
+
+//    // Get phone number
+//    firstQuote = lastLine.indexOf(34); // ASCII character for quote "
+//    Serial.println(firstQuote);  //For debugging
+//    secondQuote = lastLine.indexOf(34, firstQuote + 1);
+//    Serial.println(secondQuote); //For debugging
+//
+//    // Extracts phone number
+//    j = 0;
+//    for (int i = firstQuote + 1; i < secondQuote; ++i)
+//    {
+//      phonenumber[j] = lastLine[i];
+//      ++j;
+//    }
+//
+//    phonenumber[j] = '\0'; // phone number as a full string
+//    number = phonenumber;
+//    Serial.println(number); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
+
+    ExtractPhoneNumber();
+    Serial.println(number);
 
     // If exists on contact
     if (len > 2)
@@ -347,7 +371,7 @@ void LastLineIsCMT()
   {
     Serial.println(lastLine);
 
-    
+
     // If exists on Phonebook
     if (secondComma > 22)
     {
@@ -383,6 +407,30 @@ void LastLineIsCMT()
 
   }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void ExtractPhoneNumber()
+{
+  // Get phone number
+    firstQuote = lastLine.indexOf(34); // ASCII character for quote "
+    Serial.println(firstQuote);  //For debugging
+    secondQuote = lastLine.indexOf(34, firstQuote + 1);
+    Serial.println(secondQuote); //For debugging
+
+    // Extracts phone number
+    j = 0;
+    for (int i = firstQuote + 1; i < secondQuote; ++i)
+    {
+      phonenumber[j] = lastLine[i];
+      ++j;
+    }
+
+    phonenumber[j] = '\0'; // phone number as a full string
+    number = phonenumber;
+    Serial.println(number); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
+}
+
+
 
 
 
