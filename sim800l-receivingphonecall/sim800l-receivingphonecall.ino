@@ -244,7 +244,7 @@ void endoflinereached()
 
     // HERE GOES the extraction of mobile number code
       ExtractPhoneNumber();
-      Serial.println(number);
+      //Serial.println(number);
      
 
   }
@@ -252,7 +252,7 @@ void endoflinereached()
   {
     //LastLineIsCLIP();
     LastLineIsCMT();
-    Serial.println("Ready to process");
+    //Serial.println("Ready to process");
   }
 
   CleanCurrentLine();
@@ -291,26 +291,8 @@ void LastLineIsCLIP()
 
     // HERE GOES the extraction of mobile number code
 
-//    // Get phone number
-//    firstQuote = lastLine.indexOf(34); // ASCII character for quote "
-//    Serial.println(firstQuote);  //For debugging
-//    secondQuote = lastLine.indexOf(34, firstQuote + 1);
-//    Serial.println(secondQuote); //For debugging
-//
-//    // Extracts phone number
-//    j = 0;
-//    for (int i = firstQuote + 1; i < secondQuote; ++i)
-//    {
-//      phonenumber[j] = lastLine[i];
-//      ++j;
-//    }
-//
-//    phonenumber[j] = '\0'; // phone number as a full string
-//    number = phonenumber;
-//    Serial.println(number); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
-
     ExtractPhoneNumber();
-    Serial.println(number);
+    //Serial.println(number);
 
     // If exists on contact
     if (len > 2)
@@ -387,20 +369,46 @@ void LastLineIsCMT()
 
     //if on phonebook ---------------------------
 
+    if (isInPhonebook)
+    {
+      // If SMS contains LED ON or LED OFF or #WhiteList
+      if (lastLine.indexOf("LED ON") >= 0)
+      {
+        ledStatus = 1;   // Turns ON LED
+        //Serial.println(number);
+        gprs.sendSMS(number,"LED has been turned ON"); //define phone number and text
+        CleanPhoneNumber();
+      }
+      else if (lastLine.indexOf("LED OFF") >= 0)
+      {
+        ledStatus = 0;  // Turns OFF LED
+        gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
+        CleanPhoneNumber();
+     }
+     else if (lastLine.indexOf("#WhiteList"))
+     {
+        // Go to WhiteList Routine
+        Serial.println("Go to WhiteList Routine");
+     }
+   }
+
     // If SMS contains LED ON or LED OFF or #WhiteList
-    if (lastLine.indexOf("LED ON") >= 0)
-    {
-      ledStatus = 1;   // Turns ON LED
-    }
-    else if (lastLine.indexOf("LED OFF") >= 0)
-    {
-      ledStatus = 0;  // Turns OFF LED
-    }
-    else if (lastLine.indexOf("#WhiteList"))
-    {
+    //if (lastLine.indexOf("LED ON") >= 0)
+    //{
+      //ledStatus = 1;   // Turns ON LED
+      //Serial.println(number);
+      //gprs.sendSMS(number,"LED has been turned ON"); //define phone number and text
+    //}
+    //else if (lastLine.indexOf("LED OFF") >= 0)
+    //{
+     // ledStatus = 0;  // Turns OFF LED
+     // gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
+    //}
+    //else if (lastLine.indexOf("#WhiteList"))
+    //{
       // Go to WhiteList Routine
-      Serial.println("Go to WhiteList Routine");
-    }
+      //Serial.println("Go to WhiteList Routine");
+    //}
 
     CleanCurrentLine();
     nextLineIsMessage = false;
@@ -411,7 +419,7 @@ void LastLineIsCMT()
 //////////////////////////////////////////////////////////////////////////////////////////////
 void ExtractPhoneNumber()
 {
-  // Get phone number
+  // Parse phone number
     firstQuote = lastLine.indexOf(34); // ASCII character for quote "
     Serial.println(firstQuote);  //For debugging
     secondQuote = lastLine.indexOf(34, firstQuote + 1);
@@ -427,10 +435,21 @@ void ExtractPhoneNumber()
 
     phonenumber[j] = '\0'; // phone number as a full string
     number = phonenumber;
-    Serial.println(number); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
+    
+    ////Serial.println(number); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
 }
 
+void CleanPhoneNumber()
+{
+  //Clear char array for next line of read
+  for ( int i = 0; i < sizeof(phonenumber);  ++i )
+  {
+    phonenumber[i] = (char)0;
+  }
 
+  number = NULL;
+    
+}
 
 
 
