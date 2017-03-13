@@ -103,16 +103,15 @@ int secondQuote = -1;
 int len = -1;
 int j = -1;
 int i = -1;
+int f = -1;
+int r = -1;
 
-// Counters
+// Contact Counters
 int OldCounter = 0;
 int NewCounter = 0;
 
 //
 String tmp = "";
-
-
-
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -499,21 +498,37 @@ void LoadWhiteList()
   // This is what I will receive from "http://castillolk.com.ve/WhiteList.txt"
   // and will save in BuildString 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
 
-  BuildString = "02,05,04265860622,04275860622,04285860622,04295860622,04305860622,####";  //Deletes 2 contacts
+  BuildString = "03,05,04168262667,04275860622,04285860622,04295860622,04305860622,####";  //Deletes 3 contacts
 
   String jj   = ""; 
   tmp = BuildString.substring(0,2);  // Saves 2 in tmp (Old number of contacts in SIM)
   Serial.println(tmp);
   OldCounter  = tmp.toInt();         // Converts String to Integer
   //Serial.println(OldCounter);
-  //tmp = BuildString.substring(3,5);  // Saves 5 in temp (New number of contacts in SIM)
+  tmp = BuildString.substring(3,5);  // Saves 5 in temp (New number of contacts in SIM)
   NewCounter = tmp.toInt();          // Converts String to Integer
-  ClearWhiteList();                 
+  ClearWhiteList();
+
+  ////////////// Here Adds New Contacts ////////////
   
+  f = 6;         // aqui comienzan los nros de telefono
+  j = 1;         // lleva la cuenta de los nros a cargar
   
-
-
-
+  while(j <= NewCounter)
+  {
+    r = f+11; //  nros son de largo 11 ejm 04265860622
+    tmp = BuildString.substring(f, r);
+    jj = j;
+    tmp   = "AT+CPBW="+jj+",\""+tmp+"\",129,\""+jj+"\"\r\n";
+    if(0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT)) 
+    {
+     ERROR("ERROR:CPBW");
+     return;
+    }     
+    Serial.println(tmp);
+    f = f+12;  //  12 para saltar la coma ,
+    j = j+1;
+  }                  
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -530,10 +545,9 @@ void ClearWhiteList()
      ERROR("ERROR:CPBW");
      return;
     }     
-    Serial.println(tmp);       // comando AT a ejecutar ??    
+    Serial.println(tmp);          
     j = j+1;
   }
 }
-
 
 //--------------------------------End Functions Section----------------------------------------------//
