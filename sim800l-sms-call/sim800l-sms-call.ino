@@ -9,7 +9,7 @@
 
   //////////////////////////QUITAR
   Check out how to add a contact on the SIM Card as mentioned in the Spanish version of manual
-  "Instalaci�n de software Control de Encendido y Apagado por SMS .Prueba de Concepto del SIM800L-EVB en Arduino UNO_Finalizado"
+  "InstalaciÃ¯Â¿Â½n de software Control de Encendido y Apagado por SMS .Prueba de Concepto del SIM800L-EVB en Arduino UNO_Finalizado"
   on page 2 from https://drive.google.com/folderview?id=0BxtBNyHdFnkkUnl0RGt0RTFOZzQ
   This only processes national numbers (ones that don't include the +  prefix).
 
@@ -254,8 +254,6 @@ void endoflinereached()
     //Example:
     //+CMT: "04161587896","Yoimer","17/02/11,16:41:41-16"  secondComma position is 28
 
-    // +CMT: "04161587896","","17/02/11,16:41:41-16"
-    // secondComma position is 22 which means this number is not on SIMCard PhoneBook
 
 
     // HERE GOES the extraction of mobile number code
@@ -392,13 +390,13 @@ void LastLineIsCMT()
       {
         ledStatus = 1;   // Turns ON LED
         //Serial.println(number);
-        gprs.sendSMS(number, "LED has been turned ON"); //define phone number and text
+        ////gprs.sendSMS(number, "LED has been turned ON"); //define phone number and text BUG +58 Movistar
         CleanPhoneNumber();
       }
       else if (lastLine.indexOf("LED OFF") >= 0)
       {
         ledStatus = 0;  // Turns OFF LED
-        gprs.sendSMS(number, "LED has been turned OFF"); //define phone number and text
+        ////gprs.sendSMS(number, "LED has been turned OFF"); //define phone number and text BUG +58 Movistar
         CleanPhoneNumber();
       }
       else if (lastLine.indexOf("#WhiteList"))
@@ -551,3 +549,5 @@ void ClearWhiteList()
 }
 
 //--------------------------------End Functions Section----------------------------------------------//
+
+
