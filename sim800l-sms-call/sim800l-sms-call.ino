@@ -46,6 +46,7 @@
 
 #define TIMEOUT    15000
 #define LED_PIN    13
+#define TIMEOUTINTERNET 30000
 
 //--------------------------------End-Definition Section--------------------------------------------------//
 
@@ -110,7 +111,7 @@ int r = -1;
 int OldCounter = 0;
 int NewCounter = 0;
 
-//
+// Temporal variable when using LoadWhiteList() ClearWhiteList()
 String tmp = "";
 
 
@@ -166,6 +167,31 @@ void setup() {
     return;
   }
 
+  //AT+SAPBR=3,1,"Contype", "GPRS"
+  //AT+CPBW=1,"04168262667",129,"Yoimer"
+   //String jj;
+   //int j;
+  //jj = j;
+  //tmp = "AT+CPBW=" + jj + ",\"" + tmp + "\",129,\"" + jj + "\"\r\n";
+  
+  // f (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+
+   int numb1 = 3;
+   int numb2 = 1;
+   String n1;
+   String n2;
+   n1 = numb1;
+   n2 = numb2;
+   String newline = "\"\r\n";
+   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
+   Serial.println(tmp);
+
+   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+    {
+      ERROR("ERROR:SAPBR");
+      return;
+    }
+ 
   Serial.println("Init success");
 
 }
@@ -480,6 +506,9 @@ void LoadWhiteList()
 
   ////////////// Here GOES HTTP GET ROUTINE ////////////
 
+  void ConnectToInternet();
+
+
   //client.get("http://castillolk.com.ve/WhiteList.txt");
   //
   // ejemplo WhiteList.txt
@@ -492,41 +521,41 @@ void LoadWhiteList()
   //}
 
   ////////////// Here GOES NEW IMPLEMENTATION ////////////
- 
+
   // This is what I will receive from "http://castillolk.com.ve/WhiteList.txt"
   // and will save in BuildString 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
 
   BuildString = "03,05,04168262667,04275860622,04285860622,04295860622,04305860622,####";  //Deletes 3 contacts
 
-  String jj   = ""; 
-  tmp = BuildString.substring(0,2);  // Saves 2 in tmp (Old number of contacts in SIM)
+  String jj   = "";
+  tmp = BuildString.substring(0, 2); // Saves 2 in tmp (Old number of contacts in SIM)
   Serial.println(tmp);
   OldCounter  = tmp.toInt();         // Converts String to Integer
   //Serial.println(OldCounter);
-  tmp = BuildString.substring(3,5);  // Saves 5 in temp (New number of contacts in SIM)
+  tmp = BuildString.substring(3, 5); // Saves 5 in temp (New number of contacts in SIM)
   NewCounter = tmp.toInt();          // Converts String to Integer
   ClearWhiteList();
 
   ////////////// Here Adds New Contacts ////////////
-  
+
   f = 6;         // aqui comienzan los nros de telefono
   j = 1;         // lleva la cuenta de los nros a cargar
-  
-  while(j <= NewCounter)
+
+  while (j <= NewCounter)
   {
-    r = f+11; //  nros son de largo 11 ejm 04265860622
+    r = f + 11; //  nros son de largo 11 ejm 04265860622
     tmp = BuildString.substring(f, r);
     jj = j;
-    tmp   = "AT+CPBW="+jj+",\""+tmp+"\",129,\""+jj+"\"\r\n";
-    if(0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT)) 
+    tmp   = "AT+CPBW=" + jj + ",\"" + tmp + "\",129,\"" + jj + "\"\r\n";
+    if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
     {
-     ERROR("ERROR:CPBW");
-     return;
-    }     
+      ERROR("ERROR:CPBW");
+      return;
+    }
     Serial.println(tmp);
-    f = f+12;  //  12 para saltar la coma ,
-    j = j+1;
-  }                  
+    f = f + 12; //  12 para saltar la coma ,
+    j = j + 1;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -534,19 +563,31 @@ void ClearWhiteList()
 {
   String jj = "";
   j = 1 ;     // lleva la cuenta de los nros a borrar
-  while( j <= OldCounter) 
+  while ( j <= OldCounter)
   {
     jj = j;
-    tmp   = "AT+CPBW="+jj+"\r\n";
-    if(0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT)) 
+    tmp   = "AT+CPBW=" + jj + "\r\n";
+    if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
     {
-     ERROR("ERROR:CPBW");
-     return;
-    }     
-    Serial.println(tmp);          
-    j = j+1;
+      ERROR("ERROR:CPBW");
+      return;
+    }
+    Serial.println(tmp);
+    j = j + 1;
   }
 }
+
+void ConnectToInternet()
+{
+  tmp = "AT+SAPBR=3,1,'Contype', 'GPRS'";
+  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR");
+    return;
+  }
+  // AT+SAPBR=3,1,"Contype", "GPRS"
+}
+
 
 //--------------------------------End Functions Section----------------------------------------------//
 
