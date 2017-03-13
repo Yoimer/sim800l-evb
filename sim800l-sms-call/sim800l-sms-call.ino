@@ -18,9 +18,9 @@
   If by mistake someone tries something like (AT+CPBW= 1,"+584161587896",129,"name") or (AT+CPBW= 1,"04161587896",145,"name")
   it won't work at all since it has a "+" sign in the first case and the 145 integer in the second.
   //////////////////////////QUITAR
-  
-  
-  
+
+
+
   We will use the GPRS library from SEEEDUINO. It has a lot of functions for the SIM800L board that will make the development process easier and faster.
   You can get it from https://github.com/Seeed-Studio/Seeeduino_GPRS.git
 
@@ -103,6 +103,17 @@ int secondQuote = -1;
 int len = -1;
 int j = -1;
 int i = -1;
+
+// Counters
+int OldCounter = 0;
+int NewCounter = 0;
+
+//
+String tmp = "";
+
+
+
+
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
 
@@ -249,9 +260,9 @@ void endoflinereached()
 
 
     // HERE GOES the extraction of mobile number code
-      ExtractPhoneNumber();
-      //Serial.println(number);
-     
+    ExtractPhoneNumber();
+    //Serial.println(number);
+
 
   }
   else if ((lastLine.length() > 0) && (nextLineIsMessage))       // Rejects any empty line
@@ -382,39 +393,39 @@ void LastLineIsCMT()
       {
         ledStatus = 1;   // Turns ON LED
         //Serial.println(number);
-        gprs.sendSMS(number,"LED has been turned ON"); //define phone number and text
+        gprs.sendSMS(number, "LED has been turned ON"); //define phone number and text
         CleanPhoneNumber();
       }
       else if (lastLine.indexOf("LED OFF") >= 0)
       {
         ledStatus = 0;  // Turns OFF LED
-        gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
+        gprs.sendSMS(number, "LED has been turned OFF"); //define phone number and text
         CleanPhoneNumber();
-     }
-     else if (lastLine.indexOf("#WhiteList"))
-     {
+      }
+      else if (lastLine.indexOf("#WhiteList"))
+      {
         // Go to WhiteList Routine
         Serial.println("Go to WhiteList Routine");
-
-     }
-   }
+        LoadWhiteList();
+      }
+    }
 
     // If SMS contains LED ON or LED OFF or #WhiteList
     //if (lastLine.indexOf("LED ON") >= 0)
     //{
-      //ledStatus = 1;   // Turns ON LED
-      //Serial.println(number);
-      //gprs.sendSMS(number,"LED has been turned ON"); //define phone number and text
+    //ledStatus = 1;   // Turns ON LED
+    //Serial.println(number);
+    //gprs.sendSMS(number,"LED has been turned ON"); //define phone number and text
     //}
     //else if (lastLine.indexOf("LED OFF") >= 0)
     //{
-     // ledStatus = 0;  // Turns OFF LED
-     // gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
+    // ledStatus = 0;  // Turns OFF LED
+    // gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
     //}
     //else if (lastLine.indexOf("#WhiteList"))
     //{
-      // Go to WhiteList Routine
-      //Serial.println("Go to WhiteList Routine");
+    // Go to WhiteList Routine
+    //Serial.println("Go to WhiteList Routine");
     //}
 
     CleanCurrentLine();
@@ -427,25 +438,26 @@ void LastLineIsCMT()
 void ExtractPhoneNumber()
 {
   // Parse phone number
-    firstQuote = lastLine.indexOf(34); // ASCII character for quote "
-    Serial.println(firstQuote);  //For debugging
-    secondQuote = lastLine.indexOf(34, firstQuote + 1);
-    Serial.println(secondQuote); //For debugging
+  firstQuote = lastLine.indexOf(34); // ASCII character for quote "
+  Serial.println(firstQuote);  //For debugging
+  secondQuote = lastLine.indexOf(34, firstQuote + 1);
+  Serial.println(secondQuote); //For debugging
 
-    // Extracts phone number
-    j = 0;
-    for (int i = firstQuote + 1; i < secondQuote; ++i)
-    {
-      phonenumber[j] = lastLine[i];
-      ++j;
-    }
+  // Extracts phone number
+  j = 0;
+  for (int i = firstQuote + 1; i < secondQuote; ++i)
+  {
+    phonenumber[j] = lastLine[i];
+    ++j;
+  }
 
-    phonenumber[j] = '\0'; // phone number as a full string
-    number = phonenumber;
-    
-    ////Serial.println(number); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
+  phonenumber[j] = '\0'; // phone number as a full string
+  number = phonenumber;
+
+  ////Serial.println(number); //For Debugging // PHONENUMBER HAS TO BE CLEANED LATER
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
 void CleanPhoneNumber()
 {
   //Clear char array for next line of read
@@ -455,9 +467,73 @@ void CleanPhoneNumber()
   }
 
   number = NULL;
-    
+
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+void LoadWhiteList()
+{
+  // *************************
+  // *************************
+  // ojo  colocar  las intrucciones get  del sim800l
+
+  //HttpClient client;
+
+  String BuildString = "";   //Initialize string
+
+  ////////////// Here GOES HTTP GET ROUTINE ////////////
+
+  //client.get("http://castillolk.com.ve/WhiteList.txt");
+  //
+  // ejemplo WhiteList.txt
+  // 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
+  //
+  //while (client.available())
+  //{
+  //char      c = client.read();
+  //BuildString = BuildString + c;
+  //}
+
+  ////////////// Here GOES NEW IMPLEMENTATION ////////////
+ 
+  // This is what I will receive from "http://castillolk.com.ve/WhiteList.txt"
+  // and will save in BuildString 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
+
+  BuildString = "02,05,04265860622,04275860622,04285860622,04295860622,04305860622,####";  //Deletes 2 contacts
+
+  String jj   = ""; 
+  tmp = BuildString.substring(0,2);  // Saves 2 in tmp (Old number of contacts in SIM)
+  Serial.println(tmp);
+  OldCounter  = tmp.toInt();         // Converts String to Integer
+  //Serial.println(OldCounter);
+  //tmp = BuildString.substring(3,5);  // Saves 5 in temp (New number of contacts in SIM)
+  NewCounter = tmp.toInt();          // Converts String to Integer
+  ClearWhiteList();                 
+  
+  
+
+
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+void ClearWhiteList()
+{
+  String jj = "";
+  j = 1 ;     // lleva la cuenta de los nros a borrar
+  while( j <= OldCounter) 
+  {
+    jj = j;
+    tmp   = "AT+CPBW="+jj+"\r\n";
+    if(0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT)) 
+    {
+     ERROR("ERROR:CPBW");
+     return;
+    }     
+    Serial.println(tmp);       // comando AT a ejecutar ??    
+    j = j+1;
+  }
+}
 
 
 //--------------------------------End Functions Section----------------------------------------------//
