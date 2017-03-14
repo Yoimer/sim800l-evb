@@ -318,8 +318,9 @@ void endoflinereached()
 
 
     // HERE GOES the extraction of mobile number code
-    ExtractPhoneNumber();
-    //Serial.println(number);
+    /////ExtractPhoneNumber();    /// This inserts a bug when using Telefónica Movistar.
+                                  /// It truncates the SMS and there is no way to read it, hence 
+                                  //  system does not processes it, even when registerd on SIM card
 
 
   }
@@ -427,10 +428,11 @@ void LastLineIsCMT()
   if (nextLineIsMessage)
   {
     Serial.println(lastLine);
+    Serial.println(lastLine.length());
 
 
     // If exists on Phonebook
-    if (secondComma > 22)
+    if (secondComma > 24)    // Only works with for Telefónica Movistar Venezuela
     {
       Serial.println("In Phonebook"); //For debugging
       isInPhonebook = true;
