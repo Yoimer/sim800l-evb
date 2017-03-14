@@ -146,6 +146,14 @@ void setup() {
     Serial.print("init error\r\n");
   }
 
+  //Check Call Availability
+  if (0 != gprs.sendCmdAndWaitForResp("AT+CCALR?\r\n", "1", TIMEOUT))
+  {
+    ERROR("ERROR:CCALR");
+    return;
+  }
+
+ 
   //Set call notification
   if (0 != gprs.sendCmdAndWaitForResp("AT+CLIP=1\r\n", "OK", TIMEOUT))
   {
@@ -176,47 +184,47 @@ void setup() {
   
   // f (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
 
-   int numb1 = 3;
-   int numb2 = 1;
-   String n1;
-   String n2;
-   n1 = numb1;
-   n2 = numb2;
-   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
-   Serial.println(tmp);
-   
-   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-    {
-      ERROR("ERROR:SAPBR");
-      return;
-    }
-
-   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"
-
-   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n"; 
-
-   Serial.println(tmp);
-
-   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-    {
-      ERROR("ERROR:SAPBR");
-      return;
-    }
-
-   //AT+SAPBR=1,1
-   numb1 = 1;
-   numb2 = 1;
-   n1 = numb1;
-   n2 = numb2;
-   tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
-   Serial.println(tmp);
-   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUTINTERNET))
-   {
-      ERROR("ERROR:SAPBR");
-      return;
-   }
-
- 
+//   int numb1 = 3;
+//   int numb2 = 1;
+//   String n1;
+//   String n2;
+//   n1 = numb1;
+//   n2 = numb2;
+//   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
+//   Serial.println(tmp);
+//   
+//   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+//    {
+//      ERROR("ERROR:SAPBR");
+//      return;
+//    }
+//
+//   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"
+//
+//   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n"; 
+//
+//   Serial.println(tmp);
+//
+//   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+//    {
+//      ERROR("ERROR:SAPBR");
+//      return;
+//    }
+//
+//   //AT+SAPBR=1,1
+//   numb1 = 1;
+//   numb2 = 1;
+//   n1 = numb1;
+//   n2 = numb2;
+//   tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+//   Serial.println(tmp);
+//   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUTINTERNET))
+//   {
+//      ERROR("ERROR:SAPBR");
+//      return;
+//   }
+//
+// 
     
    
   Serial.println("Init success");
@@ -444,19 +452,19 @@ void LastLineIsCMT()
         ledStatus = 1;   // Turns ON LED
         //Serial.println(number);
         ////gprs.sendSMS(number, "LED has been turned ON"); //define phone number and text BUG +58 Movistar
-        CleanPhoneNumber();
+        ////CleanPhoneNumber();
       }
       else if (lastLine.indexOf("LED OFF") >= 0)
       {
         ledStatus = 0;  // Turns OFF LED
         ////gprs.sendSMS(number, "LED has been turned OFF"); //define phone number and text BUG +58 Movistar
-        CleanPhoneNumber();
+        ////CleanPhoneNumber();
       }
       else if (lastLine.indexOf("#WhiteList"))
       {
         // Go to WhiteList Routine
         Serial.println("Go to WhiteList Routine");
-        LoadWhiteList();
+        //LoadWhiteList();
       }
     }
 
