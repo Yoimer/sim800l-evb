@@ -182,8 +182,19 @@ void setup() {
    String n2;
    n1 = numb1;
    n2 = numb2;
-   String newline = "\"\r\n";
    tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
+   Serial.println(tmp);
+   
+   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+    {
+      ERROR("ERROR:SAPBR");
+      return;
+    }
+
+   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"
+
+   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n"; 
+
    Serial.println(tmp);
 
    if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
@@ -191,7 +202,23 @@ void setup() {
       ERROR("ERROR:SAPBR");
       return;
     }
+
+   //AT+SAPBR=1,1
+   numb1 = 1;
+   numb2 = 1;
+   n1 = numb1;
+   n2 = numb2;
+   tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+   Serial.println(tmp);
+   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUTINTERNET))
+   {
+      ERROR("ERROR:SAPBR");
+      return;
+   }
+
  
+    
+   
   Serial.println("Init success");
 
 }
