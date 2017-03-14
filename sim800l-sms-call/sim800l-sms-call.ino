@@ -460,7 +460,7 @@ void LastLineIsCMT()
         ////gprs.sendSMS(number, "LED has been turned OFF"); //define phone number and text BUG +58 Movistar
         ////CleanPhoneNumber();
       }
-      else if (lastLine.indexOf("#WhiteList"))
+      else if (lastLine.indexOf("#WhiteList") >= 0)
       {
         // Go to WhiteList Routine
         Serial.println("Go to WhiteList Routine");
@@ -541,7 +541,7 @@ void LoadWhiteList()
 
   ////////////// Here GOES HTTP GET ROUTINE ////////////
 
-  void ConnectToInternet();
+  ConnectToInternet();
 
 
   //client.get("http://castillolk.com.ve/WhiteList.txt");
