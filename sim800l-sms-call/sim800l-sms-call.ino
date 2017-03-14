@@ -464,27 +464,9 @@ void LastLineIsCMT()
       {
         // Go to WhiteList Routine
         Serial.println("Go to WhiteList Routine");
-        //LoadWhiteList();
+        LoadWhiteList();
       }
     }
-
-    // If SMS contains LED ON or LED OFF or #WhiteList
-    //if (lastLine.indexOf("LED ON") >= 0)
-    //{
-    //ledStatus = 1;   // Turns ON LED
-    //Serial.println(number);
-    //gprs.sendSMS(number,"LED has been turned ON"); //define phone number and text
-    //}
-    //else if (lastLine.indexOf("LED OFF") >= 0)
-    //{
-    // ledStatus = 0;  // Turns OFF LED
-    // gprs.sendSMS(number,"LED has been turned OFF"); //define phone number and text
-    //}
-    //else if (lastLine.indexOf("#WhiteList"))
-    //{
-    // Go to WhiteList Routine
-    //Serial.println("Go to WhiteList Routine");
-    //}
 
     CleanCurrentLine();
     nextLineIsMessage = false;
@@ -560,7 +542,7 @@ void LoadWhiteList()
   // This is what I will receive from "http://castillolk.com.ve/WhiteList.txt"
   // and will save in BuildString 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
 
-  BuildString = "03,05,04168262667,04275860622,04285860622,04295860622,04305860622,####";  //Deletes 3 contacts
+  BuildString = "05,05,04168262667,04141087615,04285860622,04295860622,04305860622,####";  //Deletes 3 contacts
 
   String jj   = "";
   tmp = BuildString.substring(0, 2); // Saves 2 in tmp (Old number of contacts in SIM)
@@ -614,13 +596,45 @@ void ClearWhiteList()
 
 void ConnectToInternet()
 {
-  tmp = "AT+SAPBR=3,1,'Contype', 'GPRS'";
-  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR");
-    return;
-  }
-  // AT+SAPBR=3,1,"Contype", "GPRS"
+   
+   // Configure bearer profile 1 command (Set GPRS MODEM to start activity)
+   //AT+SAPBR=3,1,"Contype", "GPRS" 
+   int numb1 = 3;
+   int numb2 = 1;
+   String n1;
+   String n2;
+   n1 = numb1;
+   n2 = numb2;
+   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
+   Serial.println(tmp);
+   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+   {
+     ERROR("ERROR:SAPBR");
+     return;
+   }
+   Serial.println("1-Passed!");
+
+   // Set APN Command. In our case is MOVILNET /////TELEFONICA MOVISTAR VENEZUELA
+   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"  "internet.movistar.ve"  "\"internet.movistar.ve\""
+   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n"; 
+   Serial.println(tmp);
+   Serial.println("2-Passed!");
+
+  //Open a GPRS context command. It takes a time longer than any other command (30000 seconds)
+  //AT+SAPBR=1,1
+   numb1 = 1;
+   numb2 = 1;
+   n1 = numb1;
+   n2 = numb2;
+   tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+   Serial.println(tmp);
+   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", 30000)) // 30000 seconds
+   {
+      ERROR("ERROR:SAPBR");
+      return;
+   }
+   Serial.println("3-Passed!");
+
 }
 
 
