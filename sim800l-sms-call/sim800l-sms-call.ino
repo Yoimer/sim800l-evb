@@ -321,6 +321,7 @@ void endoflinereached()
     /////ExtractPhoneNumber();    /// This inserts a bug when using Telefónica Movistar.
                                   /// It truncates the SMS and there is no way to read it, hence 
                                   //  system does not processes it, even when registerd on SIM card
+                                  // Comment out when using Movilnet or Digitel
 
 
   }
@@ -433,6 +434,7 @@ void LastLineIsCMT()
 
     // If exists on Phonebook
     if (secondComma > 24)    // Only works with for Telefónica Movistar Venezuela
+                             // secondComma > 22 when using Digitel and Movilnet
     {
       Serial.println("In Phonebook"); //For debugging
       isInPhonebook = true;
