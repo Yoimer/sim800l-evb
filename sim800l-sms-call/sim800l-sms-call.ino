@@ -115,6 +115,9 @@ int NewCounter = 0;
 String tmp = "";
 
 
+int out = false;
+
+
 //--------------------------------End-Variable Declaration-------------------------------------------//
 
 
@@ -153,7 +156,7 @@ void setup() {
     return;
   }
 
- 
+
   //Set call notification
   if (0 != gprs.sendCmdAndWaitForResp("AT+CLIP=1\r\n", "OK", TIMEOUT))
   {
@@ -177,56 +180,56 @@ void setup() {
 
   //AT+SAPBR=3,1,"Contype", "GPRS"
   //AT+CPBW=1,"04168262667",129,"Yoimer"
-   //String jj;
-   //int j;
+  //String jj;
+  //int j;
   //jj = j;
   //tmp = "AT+CPBW=" + jj + ",\"" + tmp + "\",129,\"" + jj + "\"\r\n";
-  
+
   // f (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
 
-//   int numb1 = 3;
-//   int numb2 = 1;
-//   String n1;
-//   String n2;
-//   n1 = numb1;
-//   n2 = numb2;
-//   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
-//   Serial.println(tmp);
-//   
-//   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-//    {
-//      ERROR("ERROR:SAPBR");
-//      return;
-//    }
-//
-//   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"
-//
-//   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n"; 
-//
-//   Serial.println(tmp);
-//
-//   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-//    {
-//      ERROR("ERROR:SAPBR");
-//      return;
-//    }
-//
-//   //AT+SAPBR=1,1
-//   numb1 = 1;
-//   numb2 = 1;
-//   n1 = numb1;
-//   n2 = numb2;
-//   tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
-//   Serial.println(tmp);
-//   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUTINTERNET))
-//   {
-//      ERROR("ERROR:SAPBR");
-//      return;
-//   }
-//
-// 
-    
-   
+  //   int numb1 = 3;
+  //   int numb2 = 1;
+  //   String n1;
+  //   String n2;
+  //   n1 = numb1;
+  //   n2 = numb2;
+  //   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
+  //   Serial.println(tmp);
+  //
+  //   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  //    {
+  //      ERROR("ERROR:SAPBR");
+  //      return;
+  //    }
+  //
+  //   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"
+  //
+  //   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n";
+  //
+  //   Serial.println(tmp);
+  //
+  //   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  //    {
+  //      ERROR("ERROR:SAPBR");
+  //      return;
+  //    }
+  //
+  //   //AT+SAPBR=1,1
+  //   numb1 = 1;
+  //   numb2 = 1;
+  //   n1 = numb1;
+  //   n2 = numb2;
+  //   tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+  //   Serial.println(tmp);
+  //   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUTINTERNET))
+  //   {
+  //      ERROR("ERROR:SAPBR");
+  //      return;
+  //   }
+  //
+  //
+
+
   Serial.println("Init success");
 
 }
@@ -319,9 +322,9 @@ void endoflinereached()
 
     // HERE GOES the extraction of mobile number code
     /////ExtractPhoneNumber();    /// This inserts a bug when using Telefónica Movistar.
-                                  /// It truncates the SMS and there is no way to read it, hence 
-                                  //  system does not processes it, even when registerd on SIM card
-                                  // Comment out when using Movilnet or Digitel
+    /// It truncates the SMS and there is no way to read it, hence
+    //  system does not processes it, even when registerd on SIM card
+    // Comment out when using Movilnet or Digitel
 
 
   }
@@ -434,7 +437,7 @@ void LastLineIsCMT()
 
     // If exists on Phonebook
     if (secondComma > 24)    // Only works with for Telefónica Movistar Venezuela
-                             // secondComma > 22 when using Digitel and Movilnet
+      // secondComma > 22 when using Digitel and Movilnet
     {
       Serial.println("In Phonebook"); //For debugging
       isInPhonebook = true;
@@ -598,46 +601,109 @@ void ClearWhiteList()
   }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
 void ConnectToInternet()
 {
-   
-   // Configure bearer profile 1 command (Set GPRS MODEM to start activity)
-   //AT+SAPBR=3,1,"Contype", "GPRS" 
-   int numb1 = 3;
-   int numb2 = 1;
-   String n1;
-   String n2;
-   n1 = numb1;
-   n2 = numb2;
-   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
-   Serial.println(tmp);
-   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-   {
-     ERROR("ERROR:SAPBR");
-     return;
-   }
-   Serial.println("1-Passed!");
 
-   // Set APN Command. In our case is MOVILNET /////TELEFONICA MOVISTAR VENEZUELA
-   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"  "internet.movistar.ve"  "\"internet.movistar.ve\""
-   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n"; 
-   Serial.println(tmp);
-   Serial.println("2-Passed!");
+  // Configure bearer profile 1 command (Set GPRS MODEM to start activity)
+  //AT+SAPBR=3,1,"Contype", "GPRS"
+  int numb1 = 3;
+  int numb2 = 1;
+  String n1;
+  String n2;
+  n1 = numb1;
+  n2 = numb2;
+  tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
+  Serial.println(tmp);
+  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR");
+    return;
+  }
+  Serial.println("1-Passed!");
+
+  // Set APN Command. In our case is MOVILNET /////TELEFONICA MOVISTAR VENEZUELA
+  //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"  "internet.movistar.ve"  "\"internet.movistar.ve\""
+  tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n";
+  Serial.println(tmp);
+  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-2");
+    return;
+  }
+  Serial.println("2-Passed!");
+
 
   //Open a GPRS context command. It takes a time longer than any other command (30000 seconds)
   //AT+SAPBR=1,1
-   numb1 = 1;
-   numb2 = 1;
-   n1 = numb1;
-   n2 = numb2;
-   tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
-   Serial.println(tmp);
-   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", 30000)) // 30000 seconds
-   {
-      ERROR("ERROR:SAPBR");
-      return;
-   }
-   Serial.println("3-Passed!");
+//  numb1 = 1;
+//  numb2 = 1;
+//  n1 = numb1;
+//  n2 = numb2;
+//  tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+//  Serial.println(tmp.c_str());
+//
+//  delay(3000);
+
+//  while (out == false)
+//  {
+//    //Open a GPRS context command. It takes a time longer than any other command (30000 seconds)
+//    //AT+SAPBR=1,1
+//    numb1 = 1;
+//    numb2 = 1;
+//    n1 = numb1;
+//    n2 = numb2;
+//    tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+//    Serial.println(tmp.c_str());
+//    if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", 30000))
+//    {
+//      ERROR("ERROR:SAPBR-3");
+//    }
+//    else
+//    {
+//      //out = true;
+//      Serial.println("3-Passed!");
+//      Serial.println("Leaving Loop!");
+//      break;
+//    }
+//    
+//    //AT+SAPBR=0,1
+//    numb1 = 0;
+//    numb2 = 1;
+//    n1 = numb1;
+//    n2 = numb2;
+//    tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+//    Serial.println(tmp.c_str());
+//    if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+//    {
+//      ERROR("ERROR:CLOSING GPRS");
+//    }
+//    //else
+//    //{
+//      //out = true;
+//    //}
+//  }
+
+
+  // Query the GPRS context command. (Gets DHCP IP given by provider)
+  //AT+SAPBR=2,1
+  numb1 = 2;
+  numb2 = 1;
+  n1 = numb1;
+  n2 = numb2;
+  tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+  Serial.println(tmp);
+  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-4");
+    return;
+  }
+  Serial.println("4-Passed!");
+
+
+
+  // Goes back to main program in other to proccess the DHCP IP given by provider
+  //loop();
 
 }
 
