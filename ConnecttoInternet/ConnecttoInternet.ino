@@ -75,24 +75,24 @@ GPRS gprs;
 bool ledStatus = HIGH;
 
 ////Variable to hold last line of serial output from SIM800
-char currentLine[500] = "";
+char currentLine[250] = "";
 int currentLineIndex = 0;
 
 //Boolean to be set to true if number is found on contact
 bool isIncontact = false;
 
 // Variable to hold contact from call
-char contact[13]; // changes this if needed (a contact name with more than 13 characters)
+//char contact[13]; // changes this if needed (a contact name with more than 13 characters)
 
 // Variable to hold number from call
-char phonenumber[13];
+//char phonenumber[13];
 
 // Variable to send SMS
 char *number = NULL;
 
 ////Boolean to be set to true if call notificaion was found and next line is NOT empty
 //bool nextLineIsCall = false;
-bool nextValidLineIsCall = false;
+bool nextLine = false;
 
 ////Boolean to be set to true if message notificaion was found and next
 ////line of serial output is the actual SMS message content
@@ -130,17 +130,6 @@ int out = false;
 
 
 
-/////////////////////////////////////Libelium///////////////////////////////////////////////////////////////////////
-
-int8_t answer;
-char data[512];
-int data_size;
-
-char aux_str[100];
-char aux;
-int x = 0;
-
-/////////////////////////////////////Libelium///////////////////////////////////////////////////////////////////////
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -164,7 +153,7 @@ void setup() {
   //Write current status to LED pin
   digitalWrite(LED_PIN, ledStatus);
 
-  Serial.println("Starting SIM800 SMS-Call Command Processor");
+  Serial.println("Starting SIM800 ConnectToInternet Function");
   gprs.preInit();
   delay(1000);
 
@@ -203,45 +192,6 @@ void setup() {
     return;
   }
 
-  /////////////////////////////////////Libelium///////////////////////////////////////////////////////////////////////
-
-//  Serial.println("Starting Libelium Commands...");
-//
-//  // ////char pin[]="*******"; Mine has not got any PIN
-//
-//  // /////char apn[]="*******";
-//  char apn[] = "internet.movistar.ve";
-//  /////char user_name[]="*******";
-//  char user_name[] = "";
-//  ////char password[]="*******";
-//  char password[] = "";
-//
-//  char url[ ] = "test.libelium.com/test-get-post.php?a=1&b=2";
-//
-//  ////while (sendATcommand2("AT+CREG?", "+CREG: 0,1", "+CREG: 0,5", 2000) == 0);
-//
-//  ////while (sendATcommand("AT+CREG?", "OK", 2000) == 0);
-//
-//  // sets APN , user name and password
-//  sendATcommand("AT+SAPBR=3,1,\"Contype\", \"GPRS\"", "OK", 2000);
-//
-//  snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"", apn);
-//
-//  sendATcommand(aux_str, "OK", 2000);
-//
-//  //snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"USER\",\"%s\"", user_name);
-//  //sendATcommand(aux_str, "OK", 2000);
-//
-//  //snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"PWD\",\"%s\"", password);
-//  //sendATcommand(aux_str, "OK", 2000);
-//
-//  while (sendATcommand("AT+SAPBR=1,1", "OK", 20000) == 0)
-//  {
-//    delay(5000);
-//  }
-
-  /////////////////////////////////////Libelium///////////////////////////////////////////////////////////////////////
-
   Serial.println("Init success");
 
 }
@@ -267,12 +217,12 @@ void ConnectToInternet()
   Serial.println("****************************************************");
 
   // //AT+HTTPPARA="URL","www.castillolk.com.ve/WhiteList.txt"  "AT+HTTPPARA=\"URL\",\""
-  
+
   //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt" + "\r\n"   "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n")
 
-  //Serial.println("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");   
-  
-  
+  //Serial.println("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
+
+
   //AT+SAPBR=3,1,"Contype", "GPRS"
   int numb1 = 3;
   int numb2 = 1;
@@ -283,8 +233,8 @@ void ConnectToInternet()
   tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
   //tmp = 'AT+SAPBR=3,1,"Contype", "GPRS"';
   //Serial.println(tmp); //"AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n"
-  
-  Serial.println("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n"); 
+
+  Serial.println("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n");
   if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n", "OK", TIMEOUT))
   {
     ERROR("ERROR:SAPBR-1");
@@ -292,12 +242,12 @@ void ConnectToInternet()
   }
   Serial.println("1-Passed!");
   ///////////////////////////////////////////////////////////////
-  
+
   //tmp = 'AT+SAPBR=3,1,"APN","int.movilnet.com.ve"';
   // Set APN Command. In our case is MOVILNET /////TELEFONICA MOVISTAR VENEZUELA
   //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"  "internet.movistar.ve"  "\"internet.movistar.ve\""
   //tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n";
-  
+
   //Serial.println(tmp); "AT+SAPBR=3,1,\"APN\",\"www\"\r\n"
   Serial.println("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n");
   if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n", "OK", TIMEOUT))
@@ -310,111 +260,194 @@ void ConnectToInternet()
   ///////////////////////////////////////////////////////////////
 
   //Open a GPRS context command. It takes a time longer than any other command (30000 seconds)
-    //AT+SAPBR=1,1
-    numb1 = 1;
-    numb2 = 1;
-    n1 = numb1;
-    n2 = numb2;
-    tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
-   //Serial.println(tmp.c_str()); "AT+SAPBR=1,1\r\n"
+  //AT+SAPBR=1,1
+  numb1 = 1;
+  numb2 = 1;
+  n1 = numb1;
+  n2 = numb2;
+  tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
+  //Serial.println(tmp.c_str()); "AT+SAPBR=1,1\r\n"
 
-    Serial.println("AT+SAPBR=1,1\r\n");
-    if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-3");
-     return;
-    }
-   Serial.println("3-Passed!");
+  Serial.println("AT+SAPBR=1,1\r\n");
+  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-3");
+    return;
+  }
+  Serial.println("3-Passed!");
 
-///////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////
 
-   //"AT+SAPBR=2,1\r\n"
-   Serial.println("AT+SAPBR=2,1\r\n");
-   if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=2,1\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-4");
-     return;
-    }
-   Serial.println("4-Passed!");
-   
-///////////////////////////////////////////////////////////////////////////////////////
+  //"AT+SAPBR=2,1\r\n"
+  Serial.println("AT+SAPBR=2,1\r\n");
+  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=2,1\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-4");
+    return;
+  }
+  Serial.println("4-Passed!");
 
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  //Init HTTP service
   //"AT+HTTPINIT\r\n"
   Serial.println("AT+HTTPINIT\r\n");
-   if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPINIT\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-5");
-     return;
-    }
-   Serial.println("5-Passed!");   //AT+HTTPPARA="URL","www.castillolk.com.ve/WhiteList.txt"  "AT+HTTPPARA=\"URL\",\""
+  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPINIT\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-5");
+    return;
+  }
+  Serial.println("5-Passed!");   //AT+HTTPPARA="URL","www.castillolk.com.ve/WhiteList.txt"  "AT+HTTPPARA=\"URL\",\""
 
-//////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////
 
   //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n
 
   Serial.println("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
-   if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-6");
-     return;
-    }
-  Serial.println("6-Passed!"); 
+  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-6");
+    return;
+  }
+  Serial.println("6-Passed!");
 
-///////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////
 
   //AT+HTTPACTION=0
   Serial.println("AT+HTTPACTION=0\r\n");
-   if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPACTION=0\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-7");
-     return;
-    }
-  Serial.println("7-Passed!"); 
+  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPACTION=0\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-7");
+    return;
+  }
+  Serial.println("7-Passed!");
 
-///////////////////////////////////////////////////////////////////////////////////////
-
-// Turn OFF
-
-
-
+  ///////////////////////////////////////////////////////////////////////////////////////
+  GetString();
+  
 
   //AT+HTTPREAD
   Serial.println("AT+HTTPREAD\r\n");
-   if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPREAD\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-8");
-     return;
-    }
-  Serial.println("8-Passed!"); 
+  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPREAD\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-8");
+    return;
+  }
+  Serial.println("8-Passed!");
 
-  // Turn OFF
-
-
-
-///////////////////////////////////////////////////////////////////////////////////////
-
- //AT+HTTPTERM
- Serial.println("AT+HTTPTERM\r\n");
-   if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-8");
-     return;
-    }
- Serial.println("8-Passed!"); 
+  //GetString();  // Connect to server and get whole string
 
 
-///////////////////////////////////////////////////////////////////////////////////////
 
- //AT+SAPBR=0,1
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  //AT+HTTPTERM
+  Serial.println("AT+HTTPTERM\r\n");
+  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-8");
+    return;
+  }
+  Serial.println("8-Passed!");
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+  //AT+SAPBR=0,1
   Serial.println("AT+SAPBR=0,1\r\n");
-   if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=0,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-     ERROR("ERROR:SAPBR-9");
-     return;
-    }
- Serial.println("9-Passed!"); 
- 
+  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=0,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-9");
+    return;
+  }
+  Serial.println("9-Passed!");
+
+  ///////////////////////////////////////////////////////////////////////////////////////
+
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
+
+
+void GetString()
+{
+  Serial.println("On GetString");
+  Serial.println("Serial Activity Value: ");
+  Serial.println(gprs.serialSIM800.available());
   
+  //If there is serial output from SIM800
+  if (gprs.serialSIM800.available() > 0)
+  {
+    char lastCharRead = gprs.serialSIM800.read();
+
+    //Read each character from serial output until \r or \n is reached (which denotes end of line)
+    if (lastCharRead != '\r' || lastCharRead != '\n')
+    {
+      endoflinereached();
+    }
+
+    else
+    {
+      currentLine[currentLineIndex++] = lastCharRead;
+    }
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+void endoflinereached()
+{
+  Serial.println("On endoflinereached");
+  lastLine = String(currentLine);
+  Serial.println("lastLine is: ");
+  Serial.println(lastLine);
+
+  if (lastLine.startsWith("+HTTPACTION:"))                                   //Reads HTTP status (has to be 200)
+  {
+    Serial.println(lastLine);
+    nextLine = true;
+  }
+  else if ((lastLine.length() > 0) && (nextLine))                        // Rejects any empty line
+  {
+    LastLineIsHTTPACTION;
+  }
+  else if (lastLine.startsWith("+CMT:"))                           // New incoming SMS
+  {
+    Serial.println(lastLine);
+    nextLineIsMessage = true;
+
+  }
+  else if ((lastLine.length() > 0) && (nextLineIsMessage))       // Rejects any empty line
+  {
+    //LastLineIsHTTPACTION;
+    //LastLineIsCMT();
+    //Serial.println("Ready to process");
+  }
+  else
+  {
+    Serial.println("I am empty");
+  }
+
+  CleanCurrentLine();
+}
+
+/////////////////////////////////////////////////////////
+void LastLineIsHTTPACTION()
+{
+ 
+  if (nextLine)
+  {
+    Serial.println(lastLine);
+  }  
+}
+
+//////////////////////////////////////
+void CleanCurrentLine()
+{
+  //Clear char array for next line of read
+  for ( int i = 0; i < sizeof(currentLine);  ++i )
+  {
+    currentLine[i] = (char)0;
+  }
+  currentLineIndex = 0;
 }
 
