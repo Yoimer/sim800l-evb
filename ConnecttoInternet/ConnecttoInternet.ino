@@ -173,22 +173,32 @@ void setup() {
 
 
   Serial.println("Printing AT...");
-  gprs.sendCmd("ATef\r\n");
+  //gprs.sendCmd("AT\r\n");  //"AT+SAPBR=1,1\r\n"
+  gprs.sendCmd("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n");
   ///
+  int x = 0;
   while(gprs.serialSIM800.available())
   {  
 //     Serial.println("On infinite loop...");
-     delay(3000);
+     delay(1500);
      if(gprs.serialSIM800.available())
      {
-      //char c = gprs.serialSIM800.read();
-      int numb = gprs.serialSIM800.read();
+        sim800buffer[x] = gprs.serialSIM800.read();
+//      char c = gprs.serialSIM800.read();
+//      int numb = c;
       //Serial.println(c);
-      Serial.println(numb);
+      Serial.println(sim800buffer[x]);
+      ++x;
      }
   }
   
  Serial.println("Out of loop");
+ String process = String(sim800buffer);
+ Serial.println(process);
+ if(process.indexOf("OK") >= 0)
+ {
+  Serial.println("YESSS!!");
+ }
  delay(50000);
   
 
