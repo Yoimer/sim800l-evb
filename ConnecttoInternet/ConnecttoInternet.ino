@@ -134,6 +134,7 @@ int out = false;
 char sim800buffer[300];
 String commandlist[10];
 String actualCommand = "";
+String process = "";
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -178,17 +179,6 @@ void setup() {
   ProcessCommandList();
 
 
-
-
-
-
-
-
-
-
-
-
-
   //  Serial.println("Processing commandlist...");
   //  commandlist[0] = "AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n";
   //  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";
@@ -216,60 +206,60 @@ void setup() {
   //  Serial.println("End of commandlist...");
 
 
-
-
-  Serial.println("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-1");
-    return;
-  }
-  Serial.println("1-Passed!");
-
-  Serial.println("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-2");
-    return;
-  }
-  Serial.println("2-Passed!");
-
-  Serial.println("AT+SAPBR=1,1\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-3");
-    return;
-  }
-  Serial.println("3-Passed!");
-
-  Serial.println("Printing AT...");
-  //gprs.sendCmd("AT\r\n");  //"AT+SAPBR=1,1\r\n"
-  gprs.sendCmd("AT+SAPBR=2,1\r\n");
-  ///
-  int x = 0;
-  while (gprs.serialSIM800.available())
-  {
-    //     Serial.println("On infinite loop...");
-    delay(1500);
-    if (gprs.serialSIM800.available())
-    {
-      sim800buffer[x] = gprs.serialSIM800.read();
-      //      char c = gprs.serialSIM800.read();
-      //      int numb = c;
-      //Serial.println(c);
-      Serial.println(sim800buffer[x]);
-      ++x;
-    }
-  }
-
-  Serial.println("Out of loop");
-  String process = String(sim800buffer);
-  Serial.println(process);
-  if (process.indexOf("OK") >= 0)
-  {
-    Serial.println("YESSS!!");
-  }
-  delay(50000);
+  //
+  //
+  //  Serial.println("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n");
+  //  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n", "OK", TIMEOUT))
+  //  {
+  //    ERROR("ERROR:SAPBR-1");
+  //    return;
+  //  }
+  //  Serial.println("1-Passed!");
+  //
+  //  Serial.println("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n");
+  //  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n", "OK", TIMEOUT))
+  //  {
+  //    ERROR("ERROR:SAPBR-2");
+  //    return;
+  //  }
+  //  Serial.println("2-Passed!");
+  //
+  //  Serial.println("AT+SAPBR=1,1\r\n");
+  //  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  //  {
+  //    ERROR("ERROR:SAPBR-3");
+  //    return;
+  //  }
+  //  Serial.println("3-Passed!");
+  //
+  //  Serial.println("Printing AT...");
+  //  //gprs.sendCmd("AT\r\n");  //"AT+SAPBR=1,1\r\n"
+  //  gprs.sendCmd("AT+SAPBR=2,1\r\n");
+  //  ///
+  //  int x = 0;
+  //  while (gprs.serialSIM800.available())
+  //  {
+  //    //     Serial.println("On infinite loop...");
+  //    delay(1500);
+  //    if (gprs.serialSIM800.available())
+  //    {
+  //      sim800buffer[x] = gprs.serialSIM800.read();
+  //      //      char c = gprs.serialSIM800.read();
+  //      //      int numb = c;
+  //      //Serial.println(c);
+  //      Serial.println(sim800buffer[x]);
+  //      ++x;
+  //    }
+  //  }
+  //
+  //  Serial.println("Out of loop");
+  //  String process = String(sim800buffer);
+  //  Serial.println(process);
+  //  if (process.indexOf("OK") >= 0)
+  //  {
+  //    Serial.println("YESSS!!");
+  //  }
+  //  delay(50000);
 
 
 
@@ -281,26 +271,26 @@ void setup() {
   }
 
 
-  //Set call notification
-  if (0 != gprs.sendCmdAndWaitForResp("AT+CLIP=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:CLIP");
-    return;
-  }
-
-  //Set SMS mode to ASCII
-  if (0 != gprs.sendCmdAndWaitForResp("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:CMGF");
-    return;
-  }
-
-  //Start listening to New SMS Message Indications
-  if (0 != gprs.sendCmdAndWaitForResp("AT+CNMI=1,2,0,0,0\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:CNMI");
-    return;
-  }
+  //  //Set call notification
+  //  if (0 != gprs.sendCmdAndWaitForResp("AT+CLIP=1\r\n", "OK", TIMEOUT))
+  //  {
+  //    ERROR("ERROR:CLIP");
+  //    return;
+  //  }
+  //
+  //  //Set SMS mode to ASCII
+  //  if (0 != gprs.sendCmdAndWaitForResp("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  //  {
+  //    ERROR("ERROR:CMGF");
+  //    return;
+  //  }
+  //
+  //  //Start listening to New SMS Message Indications
+  //  if (0 != gprs.sendCmdAndWaitForResp("AT+CNMI=1,2,0,0,0\r\n", "OK", TIMEOUT))
+  //  {
+  //    ERROR("ERROR:CNMI");
+  //    return;
+  //  }
 
   Serial.println("Init success");
 
@@ -350,7 +340,7 @@ void ProcessCommandList()
     //Serial.print("Value of commandlist[i]: ");
     //Serial.println(commandlist[i]);
     actualCommand = commandlist[i];
-    if (i == 3)
+    if (i == 6)
     {
       Serial.println("Going to CharByCharProcessesor function...");
       CharByCharProcessesor();
@@ -380,25 +370,45 @@ void CharByCharProcessesor()
   while (gprs.serialSIM800.available())
   {
     //     Serial.println("On infinite loop...");
-    delay(1500);
+    delay(2500);
     if (gprs.serialSIM800.available())
     {
-      sim800buffer[x] = gprs.serialSIM800.read();
-      //      char c = gprs.serialSIM800.read();
-      //      int numb = c;
-      //Serial.println(c);
+      char c = gprs.serialSIM800.read();
+      sim800buffer[x] = c;
       Serial.println(sim800buffer[x]);
       ++x;
+
+
+
+
+      //       if (c == ':')
+      //       {
+      //         Serial.println(": char passed!");
+
+
+      //         while(c != '\r')
+      //         {
+      //          Serial.println("Starting process String...");
+      //          process = process + c;
+      //          char c = gprs.serialSIM800.read();
+      //          Serial.print(process);
+      //         }
+      //int processFlag =
+      //process += c;
     }
+    //sim800buffer[x] = gprs.serialSIM800.read();
+    //Serial.println(sim800buffer[x]);
+    //++x;
+    //    }
   }
 
   Serial.println("Out of loop");
   String process = String(sim800buffer);
   Serial.println(process);
-  if (process.indexOf("OK") >= 0)
-  {
-    Serial.println("YESSS!!");
-  }
+  //  if (process.indexOf("OK") >= 0)
+  //  {
+  //    Serial.println("YESSS!!");
+  //  }
 }
 
 
