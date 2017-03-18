@@ -40,6 +40,7 @@
 #include <SoftwareSerial.h>
 
 
+
 //SIM800 TX is connected to Arduino D8
 #define SIM800_TX_PIN 8
 
@@ -75,7 +76,7 @@ GPRS gprs;
 bool ledStatus = HIGH;
 
 ////Variable to hold last line of serial output from SIM800
-char currentLine[250] = "";
+//char currentLine[250] = "";
 int currentLineIndex = 0;
 
 //Boolean to be set to true if number is found on contact
@@ -118,6 +119,8 @@ int i = -1;
 int f = -1;
 int r = -1;
 
+
+
 // Contact Counters
 int OldCounter = 0;
 int NewCounter = 0;
@@ -128,8 +131,9 @@ String tmp2 = "";
 
 int out = false;
 
-char sim800buffer[100];
-
+char sim800buffer[300];
+String commandlist[10];
+String actualCommand = "";
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -171,6 +175,49 @@ void setup() {
     return;
   }
 
+  ProcessCommandList();
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //  Serial.println("Processing commandlist...");
+  //  commandlist[0] = "AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n";
+  //  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";
+  //  commandlist[2] = "AT+SAPBR=1,1\r\n";
+  //  commandlist[3] = "AT+SAPBR=2,1\r\n";
+  //  commandlist[4] = "AT+HTTPINIT\r\n";
+  //  commandlist[5] = "AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n";
+  //  commandlist[6] = "AT+HTTPACTION=0\r\n";
+  //
+  //  for (i = 0; i < 7; ++i)
+  //  {
+  //    Serial.print("Value of commandlist[i]: ");
+  //    Serial.println(commandlist[i]);
+  //    String actualCommand = commandlist[i];
+  //    Serial.print("Value of actualComand: ");
+  //    Serial.println(actualCommand);
+  //    if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000))
+  //    {
+  //      ERROR("ERROR:");
+  //      return;
+  //    }
+  //    Serial.println("Passed!");
+  //
+  //  }
+  //  Serial.println("End of commandlist...");
+
+
+
+
   Serial.println("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n");
   if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n", "OK", TIMEOUT))
   {
@@ -200,99 +247,32 @@ void setup() {
   gprs.sendCmd("AT+SAPBR=2,1\r\n");
   ///
   int x = 0;
-  while(gprs.serialSIM800.available())
-  {  
-//     Serial.println("On infinite loop...");
-     delay(1500);
-     if(gprs.serialSIM800.available())
-     {
-        sim800buffer[x] = gprs.serialSIM800.read();
-//      char c = gprs.serialSIM800.read();
-//      int numb = c;
+  while (gprs.serialSIM800.available())
+  {
+    //     Serial.println("On infinite loop...");
+    delay(1500);
+    if (gprs.serialSIM800.available())
+    {
+      sim800buffer[x] = gprs.serialSIM800.read();
+      //      char c = gprs.serialSIM800.read();
+      //      int numb = c;
       //Serial.println(c);
       Serial.println(sim800buffer[x]);
       ++x;
-     }
+    }
   }
-  
- Serial.println("Out of loop");
- String process = String(sim800buffer);
- Serial.println(process);
- if(process.indexOf("OK") >= 0)
- {
-  Serial.println("YESSS!!");
- }
- delay(50000);
-  
 
-//  //AT+SAPBR=3,1,"Contype", "GPRS"
-//  gprs.sendCmd("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n");
-//  delay(1000);
-//
-//
-//  
-//  //AT+SAPBR=3,1,"APN","internet.movistar.ve"
-//  //tmp = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";
-//  
-//  tmp = "AT+SAPBR=3,1,\"APN\",";
-//  tmp2 = tmp + "\"internet.movistar.ve\"\r\n";
-//  gprs.sendCmd(tmp2.c_str());
-//  delay(1000);
-//
-//  //AT+SAPBR=1,1
-////  gprs.sendCmd("AT+SAPBR=1,1\r\n");
-//
-//  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-//  {
-//    ERROR("ERROR:SAPBR-3");
-//    return;
-//  }
-//  Serial.println("3-Passed!");  //"AT+SAPBR=2,1\r\n"
-//  delay(1000);
-//
-//  gprs.sendCmd("AT+SAPBR=2,1\r\n");
-//  delay(1000); 
-//
-//  gprs.sendCmd("AT+HTTPINIT\r\n");
-//  delay(1000);
-//                           //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"
-//                           
-//  gprs.sendCmd("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
-//  delay(1000);
-//
-//  gprs.sendCmd("AT+HTTPACTION=0\r\n");
-//  delay(1000);
-//  gprs.sendCmd("AT+HTTPREAD\r\n");
-//  delay(1000); 
-//  gprs.serialDebug();  //"AT+HTTPACTION=0\r\n"
-//                       //"AT+HTTPREAD\r\n"
+  Serial.println("Out of loop");
+  String process = String(sim800buffer);
+  Serial.println(process);
+  if (process.indexOf("OK") >= 0)
+  {
+    Serial.println("YESSS!!");
+  }
+  delay(50000);
 
 
 
-
-  
-//  if (gprs.serialSIM800.available())
-//  {
-//    Serial.println("Serial gprs available...");
-//    while(gprs.serialSIM800.available()) 
-//    {
-//        if(gprs.serialSIM800.available())
-//        {
-//            Serial.write(gprs.serialSIM800.read());
-//        }
-//        if(Serial.available())
-//        {     
-//            gprs.serialSIM800.write(Serial.read()); 
-//        }
-//    }
-//  }  
-
-  
-  
-  
-  
-  
-  
   //Check Call Availability
   if (0 != gprs.sendCmdAndWaitForResp("AT+CCALR?\r\n", "1", TIMEOUT))
   {
@@ -341,234 +321,96 @@ void loop()
 
 //--------------------------------End-loop Section----------------------------------------------//
 
-
+////////////////////////////////////////////////////////////////////
 void ConnectToInternet()
 {
-  Serial.println("****************************************************");
 
-  // //AT+HTTPPARA="URL","www.castillolk.com.ve/WhiteList.txt"  "AT+HTTPPARA=\"URL\",\""
+}
 
-  //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt" + "\r\n"   "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n")
+////////////////////////////////////////////////////////////////////
+void ProcessCommandList()
+{
+  Serial.println("Processing commandlist...");
+  commandlist[0] = "AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n";                                // Sets GPRS Context
+  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";                   // Sets APN
+  commandlist[2] = "AT+SAPBR=1,1\r\n";                                                   // Connects to internet
+  commandlist[3] = "AT+SAPBR=2,1\r\n";                                                  //  Gets DHCP IP given by provider
+  commandlist[4] = "AT+HTTPINIT\r\n";                                                  //  Establishes HTTP session
+  commandlist[5] = "AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"; //   Connects to Cloud
+  commandlist[6] = "AT+HTTPACTION=0\r\n";                                             // GET function (has to response 200)
 
-  //Serial.println("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
-
-
-  //AT+SAPBR=3,1,"Contype", "GPRS"
-  int numb1 = 3;
-  int numb2 = 1;
-  String n1;
-  String n2;
-  n1 = numb1;
-  n2 = numb2;
-  tmp = "AT+SAPBR=" + n1 + "," + n2 + "," +  "\"Contype\"" + "," + " " + "\"GPRS\"" + "\r\n";
-  //tmp = 'AT+SAPBR=3,1,"Contype", "GPRS"';
-  //Serial.println(tmp); //"AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n"
-
-  Serial.println("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"ConType\",\"GPRS\"\r\n", "OK", TIMEOUT))
+  for (i = 0; i < 7; ++i)
   {
-    ERROR("ERROR:SAPBR-1");
-    return;
-  }
-  Serial.println("1-Passed!");
-  ///////////////////////////////////////////////////////////////
 
-  //tmp = 'AT+SAPBR=3,1,"APN","int.movilnet.com.ve"';
-  // Set APN Command. In our case is MOVILNET /////TELEFONICA MOVISTAR VENEZUELA
-  //AT+SAPBR=3,1,"APN","int.movilnet.com.ve"  "internet.movistar.ve"  "\"internet.movistar.ve\""
-  //tmp = "AT+SAPBR=" + n1 + "," + n2 + "," + "\"APN\"" + "," + "\"internet.movistar.ve\"" + "\r\n";
-
-  //Serial.println(tmp); "AT+SAPBR=3,1,\"APN\",\"www\"\r\n"
-  Serial.println("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-2");
-    return;
-  }
-  Serial.println("2-Passed!");
-
-  ///////////////////////////////////////////////////////////////
-
-  //Open a GPRS context command. It takes a time longer than any other command (30000 seconds)
-  //AT+SAPBR=1,1
-  numb1 = 1;
-  numb2 = 1;
-  n1 = numb1;
-  n2 = numb2;
-  tmp = "AT+SAPBR=" + n1 + "," + n2 + "\r\n";
-  //Serial.println(tmp.c_str()); "AT+SAPBR=1,1\r\n"
-
-  Serial.println("AT+SAPBR=1,1\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-3");
-    return;
-  }
-  Serial.println("3-Passed!");
-
-  ///////////////////////////////////////////////////////////////
-
-  gprs.sendCmd("AT\r\n");
-  if (gprs.serialSIM800.available())
-  {
-    Serial.println("Serial gprs available...");
-    while(gprs.serialSIM800.available()) 
+    //    if(i == 3)
+    //    {
+    //      Serial.println("Going to CharByCharProcessesor function...");
+    //      CharByCharProcessesor();
+    //    }
+    //Serial.print("Value of commandlist[i]: ");
+    //Serial.println(commandlist[i]);
+    actualCommand = commandlist[i];
+    if (i == 3)
     {
-        if(gprs.serialSIM800.available())
-        {
-            Serial.write(gprs.serialSIM800.read());
-        }
-        if(Serial.available())
-        {     
-            gprs.serialSIM800.write(Serial.read()); 
-        }
+      Serial.println("Going to CharByCharProcessesor function...");
+      CharByCharProcessesor();
     }
-  }  
-
-
-  
-
-  //"AT+SAPBR=2,1\r\n"
-  Serial.println("AT+SAPBR=2,1\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=2,1\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-4");
-    return;
-  }
-  Serial.println("4-Passed!");
-
-
-  ///////////////////////////////////////////////////////////////////////////////////////
-
-  //Init HTTP service
-  //"AT+HTTPINIT\r\n"
-  Serial.println("AT+HTTPINIT\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPINIT\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-5");
-    return;
-  }
-  Serial.println("5-Passed!");   //AT+HTTPPARA="URL","www.castillolk.com.ve/WhiteList.txt"  "AT+HTTPPARA=\"URL\",\""
-
-  //////////////////////////////////////////////////////////////////////////////////////////////
-
-  //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n
-
-  Serial.println("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-6");
-    return;
-  }
-  Serial.println("6-Passed!");
-
-  ///////////////////////////////////////////////////////////////////////////////////////
-
-  //AT+HTTPACTION=0
-  Serial.println("AT+HTTPACTION=0\r\n");
-  if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPACTION=0\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-7");
-    return;
-  }
-  Serial.println("7-Passed!");
-
-  ///////////////////////////////////////////////////////////////////////////////////////
-  if (gprs.serialSIM800.available() > 0)
-  {
-    Serial.println("Serial available...");
-    int linecounter = 0;
-    while (gprs.serialSIM800.available() > 0)
+    Serial.print("Value of actualComand: ");
+    Serial.println(actualCommand);
+    // Sends all the commands (saves a lottttt of memory)
+    if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000))
     {
-      Serial.println("Serial available... on loop");
-      char lastCharRead = gprs.serialSIM800.read();
-      if (lastCharRead == '\r' || lastCharRead == '\n')
-      {
-
-        ++linecounter;
-        if (linecounter == 1)
-        {
-          Serial.print("Number of line: ");
-          Serial.println(linecounter);
-          //Serial.println(lastCharRead.length());
-        }
-        if (linecounter == 2)
-        {
-          Serial.print("Number of line: ");
-          Serial.println(linecounter);
-          //Serial.println(lastCharRead.length());
-        }
-        if (linecounter == 3)
-        {
-          Serial.print("Number of line: ");
-          Serial.println(linecounter);
-        }
-      }
-      else
-      {
-        Serial.println("Not end of line");
-      }
-    }
-  } 
-
-
-
-
-
-
-
-    //AT+HTTPREAD
-    Serial.println("AT+HTTPREAD\r\n");
-    if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPREAD\r\n", "OK", TIMEOUT)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-      ERROR("ERROR:SAPBR-8");
+      ERROR("ERROR:");
       return;
     }
-    Serial.println("8-Passed!");
-
-    //GetString();  // Connect to server and get whole string
-
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-
-    //AT+HTTPTERM
-    Serial.println("AT+HTTPTERM\r\n");
-    if (0 != gprs.sendCmdAndWaitForResp("AT+HTTPTERM\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-      ERROR("ERROR:SAPBR-8");
-      return;
-    }
-    Serial.println("8-Passed!");
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-
-    //AT+SAPBR=0,1
-    Serial.println("AT+SAPBR=0,1\r\n");
-    if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=0,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-    {
-      ERROR("ERROR:SAPBR-9");
-      return;
-    }
-    Serial.println("9-Passed!");
-
-    ///////////////////////////////////////////////////////////////////////////////////////
-
+    Serial.println("Passed!");
   }
+  Serial.println("End of commandlist...");
+}
 
-  ///////////////////////////////////////////////////////////////////////////////////////
-
-
-
-  //////////////////////////////////////
-  void CleanCurrentLine()
+////////////////////////////////////////////////////////////////////
+void CharByCharProcessesor()
+{
+  Serial.println("Printing actualCommand on CharByCharProcessesor...");
+  Serial.println(actualCommand);
+  Serial.println("Starting char processing...");
+  gprs.sendCmd(actualCommand.c_str());
+  ///
+  int x = 0;
+  while (gprs.serialSIM800.available())
   {
-    //Clear char array for next line of read
-    for ( int i = 0; i < sizeof(currentLine);  ++i )
+    //     Serial.println("On infinite loop...");
+    delay(1500);
+    if (gprs.serialSIM800.available())
     {
-      currentLine[i] = (char)0;
+      sim800buffer[x] = gprs.serialSIM800.read();
+      //      char c = gprs.serialSIM800.read();
+      //      int numb = c;
+      //Serial.println(c);
+      Serial.println(sim800buffer[x]);
+      ++x;
     }
-    currentLineIndex = 0;
   }
+
+  Serial.println("Out of loop");
+  String process = String(sim800buffer);
+  Serial.println(process);
+  if (process.indexOf("OK") >= 0)
+  {
+    Serial.println("YESSS!!");
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////
+//void CleanCurrentLine()
+//{
+//  //Clear char array for next line of read
+//  for ( int i = 0; i < sizeof(currentLine);  ++i )
+//  {
+//    currentLine[i] = (char)0;
+//  }
+//  currentLineIndex = 0;
+//}
+////////////////////////////////////////////////////////////////////
 
