@@ -173,49 +173,66 @@ void setup() {
 
 
   Serial.println("Printing AT...");
-  ////gprs.sendCmd("AT\r\n");  AT+CPBR=1,10
-
-  //AT+SAPBR=3,1,"Contype", "GPRS"
-  gprs.sendCmd("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n");
-  delay(1000);
-
-
-  
-  //AT+SAPBR=3,1,"APN","internet.movistar.ve"
-  //tmp = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";
-  
-  tmp = "AT+SAPBR=3,1,\"APN\",";
-  tmp2 = tmp + "\"internet.movistar.ve\"\r\n";
-  gprs.sendCmd(tmp2.c_str());
-  delay(1000);
-
-  //AT+SAPBR=1,1
-//  gprs.sendCmd("AT+SAPBR=1,1\r\n");
-
-  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
-  {
-    ERROR("ERROR:SAPBR-3");
-    return;
+  gprs.sendCmd("ATef\r\n");
+  ///
+  while(gprs.serialSIM800.available())
+  {  
+//     Serial.println("On infinite loop...");
+     delay(3000);
+     if(gprs.serialSIM800.available())
+     {
+      //char c = gprs.serialSIM800.read();
+      int numb = gprs.serialSIM800.read();
+      //Serial.println(c);
+      Serial.println(numb);
+     }
   }
-  Serial.println("3-Passed!");  //"AT+SAPBR=2,1\r\n"
-  delay(1000);
+  
+ Serial.println("Out of loop");
+ delay(50000);
+  
 
-  gprs.sendCmd("AT+SAPBR=2,1\r\n");
-  delay(1000); 
-
-  gprs.sendCmd("AT+HTTPINIT\r\n");
-  delay(1000);
-                           //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"
-                           
-  gprs.sendCmd("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
-  delay(1000);
-
-  gprs.sendCmd("AT+HTTPACTION=0\r\n");
-  delay(1000);
-  gprs.sendCmd("AT+HTTPREAD\r\n");
-  delay(1000); 
-  gprs.serialDebug();  //"AT+HTTPACTION=0\r\n"
-                       //"AT+HTTPREAD\r\n"
+//  //AT+SAPBR=3,1,"Contype", "GPRS"
+//  gprs.sendCmd("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n");
+//  delay(1000);
+//
+//
+//  
+//  //AT+SAPBR=3,1,"APN","internet.movistar.ve"
+//  //tmp = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";
+//  
+//  tmp = "AT+SAPBR=3,1,\"APN\",";
+//  tmp2 = tmp + "\"internet.movistar.ve\"\r\n";
+//  gprs.sendCmd(tmp2.c_str());
+//  delay(1000);
+//
+//  //AT+SAPBR=1,1
+////  gprs.sendCmd("AT+SAPBR=1,1\r\n");
+//
+//  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=1,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+//  {
+//    ERROR("ERROR:SAPBR-3");
+//    return;
+//  }
+//  Serial.println("3-Passed!");  //"AT+SAPBR=2,1\r\n"
+//  delay(1000);
+//
+//  gprs.sendCmd("AT+SAPBR=2,1\r\n");
+//  delay(1000); 
+//
+//  gprs.sendCmd("AT+HTTPINIT\r\n");
+//  delay(1000);
+//                           //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"
+//                           
+//  gprs.sendCmd("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
+//  delay(1000);
+//
+//  gprs.sendCmd("AT+HTTPACTION=0\r\n");
+//  delay(1000);
+//  gprs.sendCmd("AT+HTTPREAD\r\n");
+//  delay(1000); 
+//  gprs.serialDebug();  //"AT+HTTPACTION=0\r\n"
+//                       //"AT+HTTPREAD\r\n"
 
 
 
