@@ -81,7 +81,7 @@ String tmp = "";
 
 int out = false;
 
-char response [100];
+char response [200];
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -176,7 +176,7 @@ void setup() {
   Serial.println(response);
   //"AT+HTTPREAD\r\n"
   gprs.sendCmd("AT+HTTPREAD\r\n");
-  delay(15000);
+  //delay(5000);
   gprs.cleanBuffer(response, sizeof(response));
   gprs.readBuffer(response, sizeof(response));
   Serial.println("Printing Response");
