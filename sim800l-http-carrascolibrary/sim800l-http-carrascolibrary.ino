@@ -181,6 +181,9 @@ void setup() {
   gprs.readBuffer(response, sizeof(response));
   Serial.println("Printing Response");
   Serial.println(response);
+  tmp = String(response);
+  Serial.println("Printing response...");
+  Serial.println(tmp);
 //  //AT+HTTPTERM 
 //  gprs.sendCmd("AT+HTTPTERM\r\n");
 //  gprs.cleanBuffer(response, sizeof(response));
