@@ -169,7 +169,9 @@ void setup() {
   Serial.println("Printing Response");
   Serial.println(response);
   gprs.sendCmd("AT+HTTPACTION=0\r\n");
-  delay(5000);
+  Serial.println("Getting data, please wait...");
+  delay(10000);
+//  Serial.println("Getting data, please wait...");
   gprs.cleanBuffer(response, sizeof(response));
   gprs.readBuffer(response, sizeof(response));
   Serial.println("Printing Response");
