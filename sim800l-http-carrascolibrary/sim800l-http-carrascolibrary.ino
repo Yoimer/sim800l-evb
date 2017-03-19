@@ -182,14 +182,24 @@ void setup() {
   Serial.println("Printing Response");
   Serial.println(response);
   tmp = String(response);
-  Serial.println("Printing response...");
+  Serial.println("Printing tmp...");
   Serial.println(tmp);
-//  //AT+HTTPTERM 
-//  gprs.sendCmd("AT+HTTPTERM\r\n");
-//  gprs.cleanBuffer(response, sizeof(response));
-//  gprs.readBuffer(response, sizeof(response));
-//  Serial.println("Printing Response");
-//  Serial.println(response);
+  //AT+HTTPTERM
+  gprs.sendCmd("AT+HTTPTERM\r\n");
+  gprs.cleanBuffer(response, sizeof(response));
+  gprs.readBuffer(response, sizeof(response));
+  Serial.println("Printing Response");
+  Serial.println(response);
+  //AT+SAPBR=0,1
+  if (0 != gprs.sendCmdAndWaitForResp("AT+SAPBR=0,1\r\n", "OK", 50000)) //("AT+CMGF=1\r\n", "OK", TIMEOUT))
+  {
+    ERROR("ERROR:SAPBR-4");
+    return;
+  }
+  Serial.println("4-Passed!");
+
+
+
 
   //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n";
 
