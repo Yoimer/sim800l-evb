@@ -220,7 +220,9 @@ void setup() {
   whitelist[j] = '\0'; // whitelist as a full string
   Serial.println("Printing White List");
   Serial.println(whitelist); //For Debugging
-
+  String BuildString = whitelist;
+  Serial.println("Printing BuilString");
+  Serial.println(BuildString);
 
 
   //  thirdDollar = tmp.indexOf('$', secondDollar + 1);
