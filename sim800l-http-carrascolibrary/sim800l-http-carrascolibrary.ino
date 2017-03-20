@@ -144,6 +144,10 @@ void setup() {
     if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000))
     {
       ERROR("ERROR:");
+      Serial.println("There was a network error");
+      gprs.sendCmd("AT+CPOWD=1\r\n"); // Normal power off
+      Serial.println("System will restart, please wait...");
+      delay(25000);
       return;
     }
     Serial.println("Passed!");
@@ -190,7 +194,6 @@ void setup() {
     gprs.cleanBuffer(response, sizeof(response));
     gprs.readBuffer(response, sizeof(response));
     Serial.println("System will restart, please wait...");
-    Serial.println(response);
     delay(25000);
   }
   
