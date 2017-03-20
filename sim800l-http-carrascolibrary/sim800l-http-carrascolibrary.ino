@@ -58,12 +58,12 @@ bool isInPhonebook = false;
 String lastLine = "";
 
 // Integer indexes
-int firstComma = -1;
-int secondComma = -1;
-int thirdComma = -1;
-int forthComma = -1;
-int fifthComma = -1;
-int firstQuote = -1;
+int firstDollar = -1;
+int secondDollar = -1;
+int thirdDollar = -1;
+int forthDollar = -1;
+int fifthDollar = -1;
+int firstPound = -1;
 int secondQuote = -1;
 int len = -1;
 int j = -1;
@@ -82,6 +82,7 @@ String tmp = "";
 int out = false;
 
 char response [200];
+char whitelist [200];     // Might ge bigger if phone number is huge.
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -171,7 +172,7 @@ void setup() {
   gprs.sendCmd("AT+HTTPACTION=0\r\n");
   Serial.println("Getting data, please wait...");
   delay(10000);
-//  Serial.println("Getting data, please wait...");
+  //  Serial.println("Getting data, please wait...");
   gprs.cleanBuffer(response, sizeof(response));
   gprs.readBuffer(response, sizeof(response));
   Serial.println("Printing Response");
@@ -200,7 +201,34 @@ void setup() {
   }
   Serial.println("4-Passed!");
 
+  // Parsing tmp to determine whitelist
+  Serial.println("Processing White List");
+  firstDollar = tmp.indexOf('$');
+  Serial.println(firstDollar);  //For debugging
+  fifthDollar = tmp.indexOf('$', firstDollar + 17);
+  Serial.println(fifthDollar); //For debugging
+  firstPound = tmp.indexOf('#');
+  Serial.println(firstPound);  //For debugging
 
+  // Extracting White List
+  j = 0;
+  for (int i = fifthDollar + 1; i < firstPound; ++i)
+  {
+    whitelist[j] = tmp[i];
+    ++j;
+  }
+  whitelist[j] = '\0'; // whitelist as a full string
+  Serial.println("Printing White List");
+  Serial.println(whitelist); //For Debugging
+
+
+
+  //  thirdDollar = tmp.indexOf('$', secondDollar + 1);
+  //  Serial.println(thirdDollar);  //For debugging
+  //  forthDollar = tmp.indexOf('$', thirdDollar + 1);
+  //  Serial.println(forthDollar); //For debugging
+  //  fifthDollar = tmp.indexOf('$', forthDollar + 1);
+  //  Serial.println(fifthDollar); //For debugging
 
 
   //"AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n";
