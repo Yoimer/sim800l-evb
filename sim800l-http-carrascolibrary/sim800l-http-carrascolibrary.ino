@@ -177,6 +177,24 @@ void setup() {
   gprs.readBuffer(response, sizeof(response));
   Serial.println("Printing Response");
   Serial.println(response);
+
+  //Data received Error Checking
+  tmp = String(response);
+  if (tmp.indexOf("200") >= 0)     //string you are expecting                   
+  {
+    Serial.println("Data Succesfully Received!");
+  }
+  else
+  {
+    Serial.println("There was a network error");
+    gprs.sendCmd("AT+CPOWD=1\r\n"); // Normal power off
+    gprs.cleanBuffer(response, sizeof(response));
+    gprs.readBuffer(response, sizeof(response));
+    Serial.println("System will restart, please wait...");
+    Serial.println(response);
+    delay(25000);
+  }
+  
   //"AT+HTTPREAD\r\n"
   gprs.sendCmd("AT+HTTPREAD\r\n");
   //delay(5000);
