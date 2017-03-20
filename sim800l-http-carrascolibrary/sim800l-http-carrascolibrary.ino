@@ -75,9 +75,11 @@ int r = -1;
 int OldCounter = 0;
 int NewCounter = 0;
 
-// Temporal variable when using LoadWhiteList() ClearWhiteList()
+// Temporal variable when using LoadWhiteList() ClearWhiteList() whitelist
 String tmp = "";
 
+// String where whitelist will be definitely saved
+String BuildString = "";
 
 int out = false;
 
@@ -238,7 +240,7 @@ void setup() {
   whitelist[j] = '\0'; // whitelist as a full string
   Serial.println("Printing White List");
   Serial.println(whitelist); //For Debugging
-  String BuildString = whitelist;
+  BuildString = whitelist;
   Serial.println("Printing BuilString");
   Serial.println(BuildString);
 
@@ -263,5 +265,101 @@ void setup() {
 }
 void loop() {
   // put your main code here, to run repeatedly:
+  
+  //ClearWhiteList();
+  LoadWhiteList();
+  Serial.println("Added...");
+  delay(180000);
+  
 
 }
+
+///////////////////////////////////////////////////////////////////////////
+void ClearWhiteList()
+{
+  Serial.println("On ClearWhiteList()");
+  
+  String jj = "";
+  j = 1 ;     // lleva la cuenta de los nros a borrar
+  while( j <= OldCounter) 
+  {
+    jj = j;
+    tmp   = "AT+CPBW="+jj+"\r\n";
+    if(0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT)) 
+    {
+     ERROR("ERROR:CPBW");
+     return;
+    }     
+    Serial.println(tmp);       // comando AT a ejecutar ??    
+    j = j+1;
+  }
+}
+
+////////////////////////////////////////////////////////////////////
+void LoadWhiteList()
+{
+  Serial.println("On LoadWhiteList()");
+  Serial.print("Value of BuildString");
+  Serial.println(BuildString);
+  
+  // *************************
+  // *************************
+  // ojo  colocar  las intrucciones get  del sim800l
+
+  //HttpClient client;
+
+  ////String BuildString = "";   //Initialize string
+
+  ////////////// Here GOES HTTP GET ROUTINE ////////////
+
+  //client.get("http://castillolk.com.ve/WhiteList.txt");
+  //
+  // ejemplo WhiteList.txt
+  // 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
+  //
+  //while (client.available())
+  //{
+  //char      c = client.read();
+  //BuildString = BuildString + c;
+  //}
+
+  ////////////// Here GOES NEW IMPLEMENTATION ////////////
+ 
+  // This is what I will receive from "http://castillolk.com.ve/WhiteList.txt"
+  // and will save in BuildString 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
+
+  ////BuildString = "03,05,04168262667,04275860622,04285860622,04295860622,04305860622,####";  //Deletes 3 contacts
+
+  String jj   = ""; 
+  tmp = BuildString.substring(0,2);  // Saves Old number of contacts in SIM in tmp
+  Serial.println(tmp);
+  OldCounter  = tmp.toInt();         // Converts String to Integer
+  //Serial.println(OldCounter);
+  tmp = BuildString.substring(3,5);  // Saves New number of contacts in SIM
+  NewCounter = tmp.toInt();          // Converts String to Integer
+  ClearWhiteList();
+
+  ////////////// Here Adds New Contacts ////////////
+  
+  f = 6;         // aqui comienzan los nros de telefono
+  j = 1;         // lleva la cuenta de los nros a cargar
+  
+  while(j <= NewCounter)
+  {
+    r = f+11; //  nros son de largo 11 ejm 04265860622
+    tmp = BuildString.substring(f, r);
+    jj = j;
+    tmp   = "AT+CPBW="+jj+",\""+tmp+"\",129,\""+jj+"\"\r\n";
+    if(0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT)) 
+    {
+     ERROR("ERROR:CPBW");
+     return;
+    }     
+    Serial.println(tmp);
+    f = f+12;  //  12 para saltar la coma ,
+    j = j+1;
+  }                  
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
