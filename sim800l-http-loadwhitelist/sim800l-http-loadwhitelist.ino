@@ -263,7 +263,10 @@ void GetWhiteList()
       if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000)) //Expects OK
       {
         ERROR("ERROR:");
-        return;
+        Serial.println("There was a network problem. System will restart, please wait...");
+        RestartSystem();
+        
+        //return;
       }
       Serial.println("Passed!");
     }
@@ -277,7 +280,9 @@ void GetWhiteList()
       if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "200", 50000))  //Expects 200
       {
         ERROR("ERROR:");
-        return;
+        Serial.println("There was a network problem. System will restart, please wait...");
+        RestartSystem();
+        //return;
       }
       Serial.println("Passed!");
     }
@@ -454,3 +459,11 @@ void LoadWhiteList()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
+void RestartSystem()
+{
+   if (0 != gprs.sendCmdAndWaitForResp("AT+CPOWD=1\r\n", "NORMAL POWER DOWN", 50000))
+    {
+      ERROR("ERROR:CPOWD");
+      return;
+    }
+}
