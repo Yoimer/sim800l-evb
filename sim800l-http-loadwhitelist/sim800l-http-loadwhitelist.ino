@@ -8,7 +8,7 @@
 
 //--------------------------------Start-Definition Section--------------------------------------------------//
 
-#define TIMEOUT    15000
+#define TIMEOUT    60000
 #define LED_PIN    13
 #define TIMEOUTINTERNET 30000
 
@@ -81,7 +81,7 @@ String tmp = "";
 // Where new phonenumbers will get saved
 String BuildString = "";
 
-char response [300];
+char response [350];
 //char whitelist [200];     // Might ge bigger if phone number is huge.
 
 // List for commands to send to SIM800l
@@ -252,20 +252,20 @@ void GetWhiteList()
   {
 
     String actualCommand = commandlist[i];
-//    Serial.print("Actual Command: ");
-//    Serial.println(actualCommand.c_str());
+    //    Serial.print("Actual Command: ");
+    //    Serial.println(actualCommand.c_str());
 
     // Start sending pre-configured commands
     if (i < 6)
     {
       Serial.print("Actual Command: ");
       Serial.println(actualCommand.c_str());
-      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000)) //Expects OK
+      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 60000)) //Expects OK
       {
         ERROR("ERROR:");
         Serial.println("There was a network problem. System will restart, please wait...");
         RestartSystem();
-        
+
         //return;
       }
       Serial.println("Passed!");
@@ -277,7 +277,7 @@ void GetWhiteList()
       //"AT+HTTPACTION=0\r\n"
       Serial.print("Actual Command: ");
       Serial.println(actualCommand.c_str());
-      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "200", 50000))  //Expects 200
+      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "200", 60000))  //Expects 200
       {
         ERROR("ERROR:");
         Serial.println("There was a network problem. System will restart, please wait...");
@@ -288,59 +288,26 @@ void GetWhiteList()
     }
   }
 
-  delay(50000);
+  ////delay(50000);
 
 
-  // Reads whole buffer and takes ONLY what you needs and saves it on tmp
+  // Reads whole buffer and takes ONLY what you needs and saves it on response
 
-//  /////HTTP-GET///////////////////////////
-//  gprs.sendCmd("AT+HTTPACTION=0\r\n");                                         //HTTP GET
-//  Serial.print("Actual Command: ");
-//  Serial.println("AT+HTTPACTION=0\r\n");
-//  Serial.println("Getting data. It takes approximately 90 seconds, please wait...");
-//  delay(60000);                                            //If data gets incomplete, increase this value
-//  gprs.cleanBuffer(response, sizeof(response));
-//  gprs.readBuffer(response, sizeof(response));
-//
-//  for (i = 0; i < sizeof(response); ++i )
-//  {
-//    if (response[i] == ':')
-//    {
-//      j = i;
-//      //while (response[j] != '\r' &&  response[j] != '\n')
-//      while (response[j] != '$')
-//      {
-//        tmp += response[j];
-//        ++j;
-//      }
-//      Serial.println("Getting out of for loop...");
-//      Serial.print("Value of tmp: ");
-//      Serial.println(tmp);
-//      break;                                         // Exits for loop. There is no longer need to keep iterating
-//    }
-//  }
-//
-//  //Data received Error Checking
-//  if (tmp.indexOf("200") >= 0)     //string you are expecting
-//  {
-//    Serial.println("Data Succesfully Received!");
-//  }
-//  else
-//  {
-//    Serial.println("There was a network error");
-//    gprs.sendCmd("AT+CPOWD=1\r\n"); // Normal power off
-//    gprs.cleanBuffer(response, sizeof(response));
-//    gprs.readBuffer(response, sizeof(response));
-//    Serial.println("System will restart, please wait...");
-//    Serial.println(response);
-//    delay(25000);
-//  }
 
+  gprs.sendCmd("\r\n");
+  
   gprs.sendCmd("AT+HTTPREAD\r\n");
   Serial.print("Actual Command: ");
   Serial.println("AT+HTTPREAD\r\n");
   gprs.cleanBuffer(response, sizeof(response));
-  gprs.readBuffer(response, sizeof(response));
+  readData(response, sizeof(response), 60000);       //WORKS OK. NEVER USE DELAY ON 297
+  ///gprs.readBuffer(response, sizeof(response));   //WORKS OK NEVER USE DELAY ON 297
+  Serial.print("Printing response:");
+  Serial.println(response);
+
+  delay(50000);
+  
+  //gprs.readBuffer(response, sizeof(response));
 
   //  Serial.println("Printing response");
   //  Serial.println(response);
@@ -458,12 +425,40 @@ void LoadWhiteList()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-
 void RestartSystem()
 {
-   if (0 != gprs.sendCmdAndWaitForResp("AT+CPOWD=1\r\n", "NORMAL POWER DOWN", 50000))
-    {
-      ERROR("ERROR:CPOWD");
-      return;
-    }
+  if (0 != gprs.sendCmdAndWaitForResp("AT+CPOWD=1\r\n", "NORMAL POWER DOWN", 50000))
+  {
+    ERROR("ERROR:CPOWD");
+    return;
+  }
 }
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+int readData(char *buffer, int count, unsigned int timeOut)
+{
+  Serial.println("On readData...");
+  int i = 0;
+  unsigned long timerStart, timerEnd;
+  timerStart = millis();
+  while (1) {
+    while (gprs.serialSIM800.available()) {
+      char c = gprs.serialSIM800.read();
+      if (c == '\r' || c == '\n') c = '$';
+      buffer[i++] = c;
+      if (i > count - 1)break;
+    }
+    if (i > count - 1)break;
+    timerEnd = millis();
+    if (timerEnd - timerStart > 1000 * timeOut) {
+      break;
+    }
+  }
+  delay(500);
+  while (gprs.serialSIM800.available()) {  // display the other thing..
+    gprs.serialSIM800.read();
+  }
+  return 0;
+}
+
+
