@@ -304,6 +304,15 @@ void GetWhiteList()
   ///gprs.readBuffer(response, sizeof(response));   //WORKS OK NEVER USE DELAY ON 297
   Serial.print("Printing response:");
   Serial.println(response);
+  BuildString = String(response);
+  Serial.print("Printing BuildString");
+  Serial.println(BuildString);
+  tmp = BuildString.substring(2, 4); // Saves Old number of contacts in SIM in tmp
+  Serial.println("Printing tmp");
+  Serial.println(tmp);
+  tmp = BuildString.substring(5, 7); // Saves Old number of contacts in SIM in tmp
+  Serial.println("Printing tmp");
+  Serial.println(tmp);
 
   delay(50000);
 
@@ -312,28 +321,28 @@ void GetWhiteList()
   //  Serial.println("Printing response");
   //  Serial.println(response);
 
-  tmp = "";   // Cleans old value of tmp
-  for (i = 0; i < sizeof(response); ++i )
-  {
-    if (response[i] == ',')
-    {
-      j = i;
-      j += 1;
-      //while (response[j] != '\r' &&  response[j] != '\n')
-      while (response[j] != '#')
-      {
-        //tmp += response[j];
-        BuildString += response[j];
-        ++j;
-      }
-
-      Serial.println("Getting out of for loop...");
-      Serial.print("Value of BuildString: ");
-      Serial.println(BuildString);
-      break;                                         // Exits for loop. There is no longer need to keep iterating
-    }
-
-  }
+//  tmp = "";   // Cleans old value of tmp
+//  for (i = 0; i < sizeof(response); ++i )
+//  {
+//    if (response[i] == ',')
+//    {
+//      j = i;
+//      j += 1;
+//      //while (response[j] != '\r' &&  response[j] != '\n')
+//      while (response[j] != '#')
+//      {
+//        //tmp += response[j];
+//        BuildString += response[j];
+//        ++j;
+//      }
+//
+//      Serial.println("Getting out of for loop...");
+//      Serial.print("Value of BuildString: ");
+//      Serial.println(BuildString);
+//      break;                                         // Exits for loop. There is no longer need to keep iterating
+//    }
+//
+//  }
 
 }
 
