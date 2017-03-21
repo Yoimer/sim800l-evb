@@ -456,7 +456,7 @@ int readData(char *buffer, int count, unsigned int timeOut)
         buffer[i++] = c;
       }
       //if (c == '\r' || c == '\n') c = '$';
-      //buffer[i++] = c;
+      buffer[i++] = c;
       //if (i > count - 1)
       if (i > count - 1 || sw1 == 3)
       {
