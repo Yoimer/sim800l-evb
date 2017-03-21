@@ -122,33 +122,172 @@ void setup() {
   Serial.println("Init success");
 
   ////////////////////////////////////////////////////////////////////////////
-//  Serial.println("Processing commandlist...");
-//  commandlist[0] = "AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n";                                // Sets GPRS Context
-//  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";                   // Sets APN
-//  commandlist[2] = "AT+SAPBR=1,1\r\n";                                                   // Connects to internet
-//  commandlist[3] = "AT+SAPBR=2,1\r\n";                                                  //  Gets DHCP IP given by provider
-//  commandlist[4] = "AT+HTTPINIT\r\n";                                                  //  Establishes HTTP session
-//  commandlist[5] = "AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"; //  Defines Cloud
-//  //commandlist[6] = "AT+HTTPACTION=0\r\n"; // GET function (has to response 200)
-//
-//  for (i = 0; i < 6; ++i)
-//  {
-//
-//    String actualCommand = commandlist[i];
+  //  Serial.println("Processing commandlist...");
+  //  commandlist[0] = "AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n";                                // Sets GPRS Context
+  //  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";                   // Sets APN
+  //  commandlist[2] = "AT+SAPBR=1,1\r\n";                                                   // Connects to internet
+  //  commandlist[3] = "AT+SAPBR=2,1\r\n";                                                  //  Gets DHCP IP given by provider
+  //  commandlist[4] = "AT+HTTPINIT\r\n";                                                  //  Establishes HTTP session
+  //  commandlist[5] = "AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"; //  Defines Cloud
+  //  //commandlist[6] = "AT+HTTPACTION=0\r\n"; // GET function (has to response 200)
+  //
+  //  for (i = 0; i < 6; ++i)
+  //  {
+  //
+  //    String actualCommand = commandlist[i];
+  //    Serial.print("Actual Command: ");
+  //    Serial.println(actualCommand.c_str());
+  //
+  //    // Start sending pre-configured commands
+  //    if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000))
+  //    {
+  //      ERROR("ERROR:");
+  //      return;
+  //    }
+  //    Serial.println("Passed!");
+  //  }
+  //
+  //  // Reads whole buffer and takes ONLY what you needs and saves it on tmp
+  //
+  //  /////HTTP-GET///////////////////////////
+  //  gprs.sendCmd("AT+HTTPACTION=0\r\n");                                         //HTTP GET
+  //  Serial.print("Actual Command: ");
+  //  Serial.println("AT+HTTPACTION=0\r\n");
+  //  Serial.println("Getting data. It takes approximately 90 seconds, please wait...");
+  //  delay(60000);                                            //If data gets incomplete, increase this value
+  //  gprs.cleanBuffer(response, sizeof(response));
+  //  gprs.readBuffer(response, sizeof(response));
+  //
+  //  for (i = 0; i < sizeof(response); ++i )
+  //  {
+  //    if (response[i] == ':')
+  //    {
+  //      j = i;
+  //      //while (response[j] != '\r' &&  response[j] != '\n')
+  //      while (response[j] != '$')
+  //      {
+  //        tmp += response[j];
+  //        ++j;
+  //      }
+  //      Serial.println("Getting out of for loop...");
+  //      Serial.print("Value of tmp: ");
+  //      Serial.println(tmp);
+  //      break;                                         // Exits for loop. There is no longer need to keep iterating
+  //    }
+  //  }
+  //
+  //  //Data received Error Checking
+  //  if (tmp.indexOf("200") >= 0)     //string you are expecting
+  //  {
+  //    Serial.println("Data Succesfully Received!");
+  //  }
+  //  else
+  //  {
+  //    Serial.println("There was a network error");
+  //    gprs.sendCmd("AT+CPOWD=1\r\n"); // Normal power off
+  //    gprs.cleanBuffer(response, sizeof(response));
+  //    gprs.readBuffer(response, sizeof(response));
+  //    Serial.println("System will restart, please wait...");
+  //    Serial.println(response);
+  //    delay(25000);
+  //  }
+  //
+  //  gprs.sendCmd("AT+HTTPREAD\r\n");
+  //  Serial.print("Actual Command: ");
+  //  Serial.println("AT+HTTPREAD\r\n");
+  //  gprs.cleanBuffer(response, sizeof(response));
+  //  gprs.readBuffer(response, sizeof(response));
+  //
+  ////  Serial.println("Printing response");
+  ////  Serial.println(response);
+  //
+  //  tmp = "";   // Cleans old value of tmp
+  //  for (i = 0; i < sizeof(response); ++i )
+  //  {
+  //    if (response[i] == ',')
+  //    {
+  //      j = i;
+  //      j +=1;
+  //      //while (response[j] != '\r' &&  response[j] != '\n')
+  //      while (response[j] != '#')
+  //      {
+  //        tmp += response[j];
+  //        ++j;
+  //      }
+  //      Serial.println("Getting out of for loop...");
+  //      Serial.print("Value of tmp: ");
+  //      Serial.println(tmp);
+  //      break;                                         // Exits for loop. There is no longer need to keep iterating
+  //    }
+  //
+  //    BuildString = tmp;                               //Assigns new phonenumbers to BuildString
+  //  }
+
+
+}
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  GetWhiteList();
+  LoadWhiteList();
+  Serial.println("Added...");
+  delay(180000);
+
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+void GetWhiteList()
+{
+  Serial.println("Processing commandlist...");
+  commandlist[0] = "AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n";                                // Sets GPRS Context
+  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";                   // Sets APN
+  commandlist[2] = "AT+SAPBR=1,1\r\n";                                                   // Connects to internet
+  commandlist[3] = "AT+SAPBR=2,1\r\n";                                                  //  Gets DHCP IP given by provider
+  commandlist[4] = "AT+HTTPINIT\r\n";                                                  //  Establishes HTTP session
+  commandlist[5] = "AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"; //  Defines Cloud
+  commandlist[6] = "AT+HTTPACTION=0\r\n"; // GET function (has to response 200)
+
+  for (i = 0; i < 7; ++i)
+  {
+
+    String actualCommand = commandlist[i];
 //    Serial.print("Actual Command: ");
 //    Serial.println(actualCommand.c_str());
-//
-//    // Start sending pre-configured commands
-//    if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000))
-//    {
-//      ERROR("ERROR:");
-//      return;
-//    }
-//    Serial.println("Passed!");
-//  }
-//
-//  // Reads whole buffer and takes ONLY what you needs and saves it on tmp
-//
+
+    // Start sending pre-configured commands
+    if (i < 6)
+    {
+      Serial.print("Actual Command: ");
+      Serial.println(actualCommand.c_str());
+      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000)) //Expects OK
+      {
+        ERROR("ERROR:");
+        return;
+      }
+      Serial.println("Passed!");
+    }
+    else
+    {
+      Serial.print("Value of i: ");
+      Serial.println(i);
+      //"AT+HTTPACTION=0\r\n"
+      Serial.print("Actual Command: ");
+      Serial.println(actualCommand.c_str());
+      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "200", 50000))  //Expects 200
+      {
+        ERROR("ERROR:");
+        return;
+      }
+      Serial.println("Passed!");
+    }
+  }
+
+  delay(50000);
+
+
+  // Reads whole buffer and takes ONLY what you needs and saves it on tmp
+
 //  /////HTTP-GET///////////////////////////
 //  gprs.sendCmd("AT+HTTPACTION=0\r\n");                                         //HTTP GET
 //  Serial.print("Actual Command: ");
@@ -191,132 +330,15 @@ void setup() {
 //    Serial.println(response);
 //    delay(25000);
 //  }
-//  
-//  gprs.sendCmd("AT+HTTPREAD\r\n");
-//  Serial.print("Actual Command: ");
-//  Serial.println("AT+HTTPREAD\r\n");
-//  gprs.cleanBuffer(response, sizeof(response));
-//  gprs.readBuffer(response, sizeof(response));
-//  
-////  Serial.println("Printing response");
-////  Serial.println(response);
-//
-//  tmp = "";   // Cleans old value of tmp
-//  for (i = 0; i < sizeof(response); ++i )
-//  {
-//    if (response[i] == ',')
-//    {
-//      j = i;
-//      j +=1;
-//      //while (response[j] != '\r' &&  response[j] != '\n')
-//      while (response[j] != '#')
-//      {
-//        tmp += response[j];
-//        ++j;
-//      }
-//      Serial.println("Getting out of for loop...");
-//      Serial.print("Value of tmp: ");
-//      Serial.println(tmp);
-//      break;                                         // Exits for loop. There is no longer need to keep iterating
-//    }
-//   
-//    BuildString = tmp;                               //Assigns new phonenumbers to BuildString
-//  }
 
-
-}
-void loop() {
-  // put your main code here, to run repeatedly:
-
-  GetWhiteList();
-  LoadWhiteList();
-  Serial.println("Added...");
-  delay(180000);
-
-
-}
-
-///////////////////////////////////////////////////////////////////////////
-void GetWhiteList()
-{
-  Serial.println("Processing commandlist...");
-  commandlist[0] = "AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n";                                // Sets GPRS Context
-  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";                   // Sets APN
-  commandlist[2] = "AT+SAPBR=1,1\r\n";                                                   // Connects to internet
-  commandlist[3] = "AT+SAPBR=2,1\r\n";                                                  //  Gets DHCP IP given by provider
-  commandlist[4] = "AT+HTTPINIT\r\n";                                                  //  Establishes HTTP session
-  commandlist[5] = "AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"; //  Defines Cloud
-  //commandlist[6] = "AT+HTTPACTION=0\r\n"; // GET function (has to response 200)
-
-  for (i = 0; i < 6; ++i)
-  {
-
-    String actualCommand = commandlist[i];
-    Serial.print("Actual Command: ");
-    Serial.println(actualCommand.c_str());
-
-    // Start sending pre-configured commands
-    if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 50000))
-    {
-      ERROR("ERROR:");
-      return;
-    }
-    Serial.println("Passed!");
-  }
-
-  // Reads whole buffer and takes ONLY what you needs and saves it on tmp
-
-  /////HTTP-GET///////////////////////////
-  gprs.sendCmd("AT+HTTPACTION=0\r\n");                                         //HTTP GET
-  Serial.print("Actual Command: ");
-  Serial.println("AT+HTTPACTION=0\r\n");
-  Serial.println("Getting data. It takes approximately 90 seconds, please wait...");
-  delay(60000);                                            //If data gets incomplete, increase this value
-  gprs.cleanBuffer(response, sizeof(response));
-  gprs.readBuffer(response, sizeof(response));
-
-  for (i = 0; i < sizeof(response); ++i )
-  {
-    if (response[i] == ':')
-    {
-      j = i;
-      //while (response[j] != '\r' &&  response[j] != '\n')
-      while (response[j] != '$')
-      {
-        tmp += response[j];
-        ++j;
-      }
-      Serial.println("Getting out of for loop...");
-      Serial.print("Value of tmp: ");
-      Serial.println(tmp);
-      break;                                         // Exits for loop. There is no longer need to keep iterating
-    }
-  }
-
-  //Data received Error Checking
-  if (tmp.indexOf("200") >= 0)     //string you are expecting
-  {
-    Serial.println("Data Succesfully Received!");
-  }
-  else
-  {
-    Serial.println("There was a network error");
-    gprs.sendCmd("AT+CPOWD=1\r\n"); // Normal power off
-    gprs.cleanBuffer(response, sizeof(response));
-    gprs.readBuffer(response, sizeof(response));
-    Serial.println("System will restart, please wait...");
-    Serial.println(response);
-    delay(25000);
-  }
-  
   gprs.sendCmd("AT+HTTPREAD\r\n");
   Serial.print("Actual Command: ");
   Serial.println("AT+HTTPREAD\r\n");
   gprs.cleanBuffer(response, sizeof(response));
   gprs.readBuffer(response, sizeof(response));
-  
-//  Serial.println("Printing response");
-//  Serial.println(response);
+
+  //  Serial.println("Printing response");
+  //  Serial.println(response);
 
   tmp = "";   // Cleans old value of tmp
   for (i = 0; i < sizeof(response); ++i )
@@ -324,23 +346,21 @@ void GetWhiteList()
     if (response[i] == ',')
     {
       j = i;
-      j +=1;
+      j += 1;
       //while (response[j] != '\r' &&  response[j] != '\n')
       while (response[j] != '#')
       {
-        tmp += response[j];
+        //tmp += response[j];
+        BuildString += response[j];
         ++j;
       }
 
       Serial.println("Getting out of for loop...");
-      Serial.print("Value of tmp: ");
-      Serial.println(tmp);
       Serial.print("Value of BuildString: ");
-      BuildString = String(tmp);
       Serial.println(BuildString);
       break;                                         // Exits for loop. There is no longer need to keep iterating
     }
-   
+
   }
 
 }
@@ -377,8 +397,8 @@ void LoadWhiteList()
 
   //HttpClient client;
 
-//  String BuildString = "";   //Initialize string
-//  BuildString = tmp;  
+  //  String BuildString = "";   //Initialize string
+  //  BuildString = tmp;
 
   ////////////// Here GOES HTTP GET ROUTINE ////////////
 
