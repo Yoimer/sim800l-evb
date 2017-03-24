@@ -30,9 +30,11 @@ GPRS gprs;
 int j = -1;
 int i = -1;
 int kk = -1;
+int OldCounter = -1;
+int NewCounter = -1;
 
 // Temporal variable when manipulating char arrays
-//String tmp = "";
+//char tmp = "";
 
 //String BuildString = "";
 
@@ -136,107 +138,12 @@ void GetWhiteList()
     Serial.print("Actual Command: ");
     Serial.println("AT+HTTPREAD\r\n");
     gprs.cleanBuffer(response, sizeof(response));
-//  readData(response, sizeof(response), 60000);      
-    gprs.readBuffer(response, sizeof(response));
+    readData(response, sizeof(response), 60000);      
+    ///gprs.readBuffer(response, sizeof(response));
     Serial.print("Printing response:");
     Serial.println(response);
-
-
 }
 
-
-
-//  Serial.println("Processing commandlist...");
-//  commandlist[0] = "AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n";                                // Sets GPRS Context
-//  commandlist[1] = "AT+SAPBR=3,1,\"APN\",\"internet.movistar.ve\"\r\n";                   // Sets APN
-//  commandlist[2] = "AT+SAPBR=1,1\r\n";                                                   // Connects to internet
-//  commandlist[3] = "AT+SAPBR=2,1\r\n";                                                  //  Gets DHCP IP given by provider
-//  commandlist[4] = "AT+HTTPINIT\r\n";                                                  //  Establishes HTTP session
-//  commandlist[5] = "AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n"; //  Defines Cloud
-//  commandlist[6] = "AT+HTTPACTION=0\r\n"; // GET function (has to response 200)
-//
-//  for (i = 0; i < 7; ++i)
-//  {
-//
-//    String actualCommand = commandlist[i];
-//    //    Serial.print("Actual Command: ");
-//    //    Serial.println(actualCommand.c_str());
-//
-//    // Start sending pre-configured commands
-//    if (i < 6)
-//    {
-//      Serial.print("Actual Command: ");
-//      Serial.println(actualCommand.c_str());
-//      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "OK", 60000)) //Expects OK
-//      {
-//        ERROR("ERROR:");
-//        Serial.println("There was a network problem. System will restart, please wait...");
-//        RestartSystem();
-//
-//        //return;
-//      }
-//      Serial.println("Passed!");
-//    }
-//    else
-//    {
-//      Serial.print("Value of i: ");
-//      Serial.println(i);
-//      //"AT+HTTPACTION=0\r\n"
-//      Serial.print("Actual Command: ");
-//      Serial.println(actualCommand.c_str());
-//      if (0 != gprs.sendCmdAndWaitForResp(actualCommand.c_str(), "200", 60000))  //Expects 200
-//      {
-//        ERROR("ERROR:");
-//        Serial.println("There was a network problem. System will restart, please wait...");
-//        RestartSystem();
-//        //return;
-//      }
-//      Serial.println("Passed!");
-//    }
-//  }
-
-////delay(50000);
-
-
-// Reads whole buffer and takes ONLY what you needs and saves it on response
-
-
-//  gprs.sendCmd("\r\n");
-//
-//  gprs.sendCmd("AT+HTTPREAD\r\n");
-//  Serial.print("Actual Command: ");
-//  Serial.println("AT+HTTPREAD\r\n");
-//  gprs.cleanBuffer(response, sizeof(response));
-//  readData(response, sizeof(response), 60000);       //WORKS OK. NEVER USE DELAY ON 297
-//  ///gprs.readBuffer(response, sizeof(response));   //WORKS OK NEVER USE DELAY ON 297
-//  Serial.print("Printing response:");
-//  Serial.println(response);
-//
-//  kk = i - 2;   // priinting kk
-//  Serial.println("Printing kk: ");
-//  Serial.println(kk);
-//  Serial.println("Printing tmp: ");
-//  Serial.println(tmp);
-//  BuildString = String (tmp); //BuildString = String(response);
-//  Serial.println( BuildString);
-//  tmp = BuildString.substring(2, 4);
-//  Serial.println("Printing tmp");
-//  Serial.println(tmp);
-//
-//  // Getting part of BuildString and assign it to tmp (Sometimes might work but not always)
-//  tmp = BuildString.substring(5, 7);
-//  Serial.println("Printing tmp");
-//  Serial.println(tmp);
-//
-//  // Trying to get  part of BuildString and reassign it to BuildString (It has never worked)
-//  kk = i - 2;   // new
-//  tmp = BuildString.substring(2, kk);  // new
-//  Serial.print("Printing tmp");
-//  Serial.println(tmp);
-//
-//  delay(50000);    // Stay here. Ignore anything else.
-//}
-//
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void RestartSystem()
 {
@@ -247,49 +154,85 @@ void RestartSystem()
   }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//int readData(char *buffer, int count, unsigned int timeOut)
-//{
-//  Serial.println("On readData...");
-//  //int i = 0; removed
-//  i = 0; tmp = ""; // added
-//  unsigned long timerStart, timerEnd;
-//  timerStart = millis();
-//  int sw1 = 0;
-//  while (1)
+int readData(char *buffer, int count, unsigned int timeOut)
+{
+  Serial.println("On readData...");
+  int sw1;
+  unsigned long timerStart, timerEnd;
+  timerStart = millis();
+  while (1)
+  {
+    sw1 = 0;
+    while (gprs.serialSIM800.available())
+    {
+      char c = gprs.serialSIM800.read();
+      if (c == '#') {
+        sw1 = sw1 + 1;
+        Buscar();
+        break;
+      }
+    }
+    if (sw1 == 1) {
+      break;
+    }
+    timerEnd = millis();
+    if (timerEnd - timerStart > 1000 * timeOut) {
+      break;
+    }
+  }
+  delay(500);
+  while (gprs.serialSIM800.available()) {
+    gprs.serialSIM800.read();
+  }
+  return 0;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////
+void Buscar()
+{
+  Serial.println("On Buscar...");
+  memset(response, '\0', sizeof(response));  // Initialize the char array as string
+  i = 0;
+  char c = gprs.serialSIM800.read();
+  ////tmp = tmp + c;
+  response[i] = c;
+  i = i + 1;
+  c = gprs.serialSIM800.read();
+  ////tmp = tmp + c;
+  response[i] = c;
+  i = i + 1;
+  response[i] = '\0';
+  ///OldCounter = tmp.toInt();
+  OldCounter = atoi(response);
+  Serial.println("OldCounter: ");
+  Serial.println(OldCounter);
+  i = 0;
+  c = gprs.serialSIM800.read();
+  ///tmp = tmp + c;
+  response[i] = c;
+  i = i + 1;
+  c = gprs.serialSIM800.read();
+  ////tmp = tmp + c;
+  response[i] = c;
+  i = i + 1;
+  response[i] = '\0';
+  NewCounter = atoi(response);
+  Serial.println("NewCounter: ");
+  Serial.println(NewCounter);
+  ////NewCounter = tmp.toInt();
+//  i = 0;
+//  j = 1;
+//  while ( j <= NewCounter)
 //  {
-//    while (gprs.serialSIM800.available())
+//    jj = 1;
+//    tmp = '';
+//    while (jj <= 11)
 //    {
-//      char c = gprs.serialSIM800.read();
-//      if (c == '#')
-//      {
-//        sw1 = sw1 + 1;
-//      }
-//      if (sw1 >= 2)
-//      {
-//        //buffer[i++] = c;
-//        tmp = tmp + c;
-//      }
-//
-//      if (i > count - 1 || sw1 == 3)
-//      {
-//        // buffer[i++] = '\0';
-//        break;
-//      }
+//      c = gprs.serialSIM800.read();
+//      tmp = tmp + c;
+//      jj = jj + 1;
 //    }
-//    if (i > count - 1 || sw1 == 3)
-//    {
-//      break;
-//    }
-//    timerEnd = millis();
-//    if (timerEnd - timerStart > 1000 * timeOut)
-//    {
-//      break;
-//    }
+//    PhoneNumber[j] = c;
+//    j = j + 1;
 //  }
-//  delay(500);
-//  while (gprs.serialSIM800.available()) {  // Cleans buffer
-//    gprs.serialSIM800.read();
-//  }
-//  return 0;
-//}
+//  sw1 = 1;
+}
