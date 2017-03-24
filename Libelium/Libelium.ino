@@ -48,7 +48,8 @@ char aux;
 int x = 0;
 
 char pin[] = "*******";
-char apn[] = "*******";
+////char apn[] = "*******";
+char apn[] = "internet.movistar.ve";
 char user_name[] = "*******";
 char password[] = "*******";
 
@@ -77,10 +78,11 @@ void setup() {
   //
   //  Serial.println("Setup Complete!");
 
-  Serial.println("Starting...");
+  Serial.println("Starting...");   //AT+SAPBR=3,1,"APN","internet.movistar.ve"
   power_on();
 
-  //  delay(3000);
+  delay(3000);
+
   //
   //  //sets the PIN code
   //  snprintf(aux_str, sizeof(aux_str), "AT+CPIN=%s", pin);
@@ -90,125 +92,129 @@ void setup() {
   //
   //  while (sendATcommand2("AT+CREG?", "+CREG: 0,1", "+CREG: 0,5", 2000) == 0);
   //
-  //  // sets APN , user name and password
-  //  sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"", "OK", 2000);
-  //  snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"", apn);
-  //  sendATcommand(aux_str, "OK", 2000);
-  //
-  //  snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"USER\",\"%s\"", user_name);
-  //  sendATcommand(aux_str, "OK", 2000);
-  //
-  //  snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"PWD\",\"%s\"", password);
-  //  sendATcommand(aux_str, "OK", 2000);
-  //
-  //  while (sendATcommand("AT+SAPBR=1,1", "OK", 20000) == 0)
-  //  {
-  //    delay(5000);
-  //  }
+
+  // sets APN , user name and password
+  sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n", "OK\r\n", 2000);
+  snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);
+  sendATcommand(aux_str, "OK\r\n", 2000);
+
+  while (sendATcommand("AT+SAPBR=1,1\r\n", "OK\r\n", 60000) == 0)
+  {
+    Serial.println("Trying connection, please wait...");
+    delay(5000);
+  }
 
 
 }
 void loop() {
-  
- Serial.println("On void loop....!");
- delay(10000);
-  
   // Initializes HTTP service
-  //  answer = sendATcommand("AT+HTTPINIT", "OK", 10000);
-  //  if (answer == 1)
-  //  {
-  //    // Sets CID parameter
-  //    answer = sendATcommand("AT+HTTPPARA=\"CID\",1", "OK", 5000);
-  //    if (answer == 1)
-  //    {
-  //      // Sets url
-  //
-  //      snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"", url);
-  //
-  //      answer = sendATcommand(aux_str, "OK", 5000);
-  //      if (answer == 1)
-  //      {
-  //        // Starts GET action
-  //        answer = sendATcommand("AT+HTTPACTION=0", "+HTTPACTION:0,200", 10000);
-  //
-  //        if (answer == 1)
-  //        {
-  //          x = 0;
-  //          do {
-  //            sprintf(aux_str, "AT+HTTPREAD=%d,100", x);
-  //            if (sendATcommand2(aux_str, "+HTTPREAD:", "ERROR", 30000) == 1)
-  //            {
-  //              data_size = 0;
-  //              while (Serial.available() == 0);
-  //              aux = Serial.read();
-  //              do {
-  //                data_size *= 10;
-  //                data_size += (aux - 0x30);
-  //                while (Serial.available() == 0);
-  //                aux = Serial.read();
-  //              } while (aux != 0x0D);
-  //
-  //              Serial.print("Data received: ");
-  //              Serial.println(data_size);
-  //
-  //              if (data_size > 0)
-  //              {
-  //                while (Serial.available() < data_size);
-  //                Serial.read();
-  //
-  //                for (int y = 0; y < data_size; y++)
-  //                {
-  //                  data[x] = Serial.read();
-  //                  x++;
-  //                }
-  //                data[x] = '\0';
-  //              }
-  //              else
-  //              {
-  //                Serial.println("Download finished");
-  //              }
-  //            }
-  //            else if (answer == 2)
-  //            {
-  //              Serial.println("Error from HTTP");
-  //            }
-  //            else
-  //            {
-  //              Serial.println("No more data available");
-  //              data_size = 0;
-  //            }
-  //
-  //            sendATcommand("", "+HTTPACTION:0,200", 20000);
-  //          } while (data_size > 0);
-  //
-  //          Serial.print("Data received: ");
-  //          Serial.println(data);
-  //        }
-  //        else
-  //        {
-  //          Serial.println("Error getting the url");
-  //        }
-  //      }
-  //      else
-  //      {
-  //        Serial.println("Error setting the url");
-  //      }
-  //    }
-  //    else
-  //    {
-  //      Serial.println("Error setting the CID");
-  //    }
-  //  }
-  //  else
-  //  {
-  //    Serial.println("Error initializating");
-  //  }
-  //
-  //  sendATcommand("AT+HTTPTERM", "OK", 5000);
-  //
-  //  delay(5000);
-
+  answer = sendATcommand("AT+HTTPINIT\r\n", "OK\r\n", 10000);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    // Sets CID parameter
+//    answer = sendATcommand("AT+HTTPPARA=\"CID\",1", "OK", 5000);
+//    if (answer == 1)
+//    {
+// Sets url
+//
+//      snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"", url);
+//
+//      answer = sendATcommand(aux_str, "OK", 5000);
+//      if (answer == 1)
+//      {
+//        // Starts GET action
+//        answer = sendATcommand("AT+HTTPACTION=0", "+HTTPACTION:0,200", 10000);
+//
+//        if (answer == 1)
+//        {
+//          x = 0;
+//          do {
+//            sprintf(aux_str, "AT+HTTPREAD=%d,100", x);
+//            if (sendATcommand2(aux_str, "+HTTPREAD:", "ERROR", 30000) == 1)
+//            {
+//              data_size = 0;
+//              while (Serial.available() == 0);
+//              aux = Serial.read();
+//              do {
+//                data_size *= 10;
+//                data_size += (aux - 0x30);
+//                while (Serial.available() == 0);
+//                aux = Serial.read();
+//              } while (aux != 0x0D);
+//
+//              Serial.print("Data received: ");
+//              Serial.println(data_size);
+//
+//              if (data_size > 0)
+//              {
+//                while (Serial.available() < data_size);
+//                Serial.read();
+//
+//                for (int y = 0; y < data_size; y++)
+//                {
+//                  data[x] = Serial.read();
+//                  x++;
+//                }
+//                data[x] = '\0';
+//              }
+//              else
+//              {
+//                Serial.println("Download finished");
+//              }
+//            }
+//            else if (answer == 2)
+//            {
+//              Serial.println("Error from HTTP");
+//            }
+//            else
+//            {
+//              Serial.println("No more data available");
+//              data_size = 0;
+//            }
+//
+//            sendATcommand("", "+HTTPACTION:0,200", 20000);
+//          } while (data_size > 0);
+//
+//          Serial.print("Data received: ");
+//          Serial.println(data);
+//        }
+//        else
+//        {
+//          Serial.println("Error getting the url");
+//        }
+//      }
+//      else
+//      {
+//        Serial.println("Error setting the url");
+//      }
+//    }
+//    else
+//    {
+//      Serial.println("Error setting the CID");
+//    }
+//  }
+//  else
+//  {
+//    Serial.println("Error initializating");
+//  }
+//
+//  sendATcommand("AT+HTTPTERM", "OK", 5000);
+//
+//  delay(5000);
+
+//}
 
 void power_on() {
 
@@ -232,11 +238,6 @@ void power_on() {
       Serial.println("Trying connection with module...");
     }
   }
-  else
-  {
-    Serial.println("Passed!");  
-  }
-
 }
 
 
