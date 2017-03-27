@@ -53,8 +53,8 @@ char apn[] = "internet.movistar.ve";
 char user_name[] = "*******";
 char password[] = "*******";
 
-char url[ ] = "test.libelium.com/test-get-post.php?a=1&b=2";
-
+////char url[ ] = "test.libelium.com/test-get-post.php?a=1&b=2";
+char url[ ] = "www.castillolk.com.ve/WhiteList.txt";
 
 void setup() {
 
@@ -100,15 +100,38 @@ void setup() {
 
   while (sendATcommand("AT+SAPBR=1,1\r\n", "OK\r\n", 60000) == 0)
   {
-    Serial.println("Trying connection, please wait...");
     delay(5000);
+    sendATcommand("AT+CPOWD=1\r\n", "NORMAL POWER DOWN\r\n", 60000);
   }
 
 
 }
-void loop() {
+void loop()
+{
   // Initializes HTTP service
   answer = sendATcommand("AT+HTTPINIT\r\n", "OK\r\n", 10000);
+  if (answer == 1)
+  {
+    Serial.println(answer);
+    // Sets url
+    snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
+    answer = sendATcommand(aux_str, "OK", 5000);
+    if (answer == 1)
+    {
+      Serial.println(answer);
+    }
+    else
+    {
+      Serial.println("Error setting the url");
+      sendATcommand("AT+CPOWD=1\r\n", "NORMAL POWER DOWN\r\n", 60000);
+    }
+
+  }
+  else
+  {
+    Serial.println("Error initializating");
+    sendATcommand("AT+CPOWD=1\r\n", "NORMAL POWER DOWN\r\n", 60000);
+  }
 }
 
 
