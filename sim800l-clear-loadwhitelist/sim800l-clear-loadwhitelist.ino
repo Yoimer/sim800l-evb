@@ -84,43 +84,32 @@ void setup() {
 
   Serial.println("Init success");
   //char jj   = 'A';
-  //  Serial.println("Printing jj");
-  //  Serial.println(jj);
-  j = 3;
-  //jj = j;
-  Serial.println("Printing jj as char");  //char* someCharPointer = (char*)someInteger;
-  //char jj[3]; 
-  itoa(j, jj, 10);
-  Serial.println(jj);
-  char*tmp = join3Strings("AT+CPBW=", jj, "\r\n");
-  /////char*tmp = join3Strings("AT+CPBW=", "AT+CPBW=", "AT+CPBW="); WORKS
-  Serial.println("Printing tmp");
-  Serial.println(tmp);
 }
-void loop() {
-  // put your main code here, to run repeatedly:
-  //  OldCounter = 5;
-  //  ClearWhiteList();
 
+void loop()
+{
+  // put your main code here, to run repeatedly:
+  OldCounter = 5;
+  ClearWhiteList();
+  Serial.println("Added");
+  delay(30000);
 }
 
 /////////////////////////////////////////////////////////////////////
 void ClearWhiteList()
 {
-  char jj   = "";
-  //strcat(to,from)
-  j = 1 ;         // lleva la cuenta de los nros a borrar  (char)0
+  j = 1;         // lleva la cuenta de los nros a borrar
   while ( j  <= OldCounter)
   {
     Serial.println("Deleting Contacts.");
-    jj = j;
+    itoa(j, jj, 10);
     // tmp = "AT+CPBW=" + jj + "\r\n"; numChars
     char *tmp = join3Strings("AT+CPBW=", jj, "\r\n");
-    //    if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-    //    {
-    //      ERROR("ERROR:CPBW");
-    //      return;
-    //    }
+    if (0 != gprs.sendCmdAndWaitForResp(tmp, "OK", TIMEOUT))
+    {
+      ERROR("ERROR:CPBW");
+      return;
+    }
     Serial.println(tmp);       // comando AT a ejecutar ??
     j   = j + 1;
   }
@@ -133,8 +122,6 @@ char* join3Strings(char* string1, char* string2, char* string3)
   strcat(respuesta, string1);
   strcat (respuesta, string2);
   strcat (respuesta, string3);
-  Serial.println("respuesta:");
-  Serial.println(respuesta);
   return respuesta;
 }
 
@@ -159,11 +146,11 @@ char* join3Strings(char* string1, char* string2, char* string3)
 //  char* lcdOutput = join3Strings("Mode ", "1" , " selected");
 
 
-//The itoa() stdlib C library function can be used to convert a number into a string, 
-//in a variety of bases (e.g. decimal, binary). The buffer must be large enough to hold the largest number, 
+//The itoa() stdlib C library function can be used to convert a number into a string,
+//in a variety of bases (e.g. decimal, binary). The buffer must be large enough to hold the largest number,
 //plus sign and terminating null: e.g. 32 bit base-10: "-2147483648\0" = 12 characters.
 //
-//The stdlib itoa() library routine adds around 600 bytes, the roll-your-own K&R implementation, 
+//The stdlib itoa() library routine adds around 600 bytes, the roll-your-own K&R implementation,
 //which includes string.h, adds around 670 bytes. Using snprintf() from stdio.h adds just over 2200 bytes.
 //
 //e.g.
