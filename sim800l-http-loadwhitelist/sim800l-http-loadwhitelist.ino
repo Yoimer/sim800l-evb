@@ -38,11 +38,11 @@ char startChar = '#'; // or '!', or whatever your start character is
 char endChar = '#';
 boolean storeString = false; //This will be our flag to put the data in our buffer
 
-int const DATABUFFERSIZE = 512;
-char dataBuffer[512]; //Add 1 for NULL terminator
+int const DATABUFFERSIZE = 200;
+char dataBuffer[201]; //Add 1 for NULL terminator
 byte dataBufferIndex = 0;
 
-char response [512];
+char response [350];
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
 
@@ -145,11 +145,14 @@ void GetWhiteList()
   Serial.println(strlen(response));  // Does not include a trailing null character
   len = strlen(response);
   len = len + 1;
-  Serial.print("Printing for loop:");
-  for (i=0; i < len; ++i)
-  {
-    Serial.print(response[i]);
-  }
+  getSerialString();
+
+  
+//  Serial.print("Printing for loop:");
+//  for (i = 0; i < len; ++i)
+//  {
+//    Serial.print(response[i]);
+//  }
 
   //gprs.cleanBuffer(response, sizeof(response));
   //readData(response, sizeof(response), 60000);
@@ -171,4 +174,62 @@ void RestartSystem()
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 //Removes startChar and endChar
+boolean getSerialString()
+{
+  Serial.println("On getSerialString...");
+  Serial.print("Printing response:");
+  Serial.println(response);
+  Serial.print("Printing strlen:");
+  Serial.print(len);
+  static byte dataBufferIndex = 0;
+  i = 0;
+  ////while (Serial.available() > 0)
+  while(i < len )
+  {
+    ////char incomingbyte = Serial.read();
+    Serial.println("On while loop...");
+    char incomingbyte = response[i];
+    Serial.print(incomingbyte);
+    if (storeString)
+    {
+      //Let's check our index here, and abort if we're outside our buffer size
+      //We use our define here so our buffer size can be easily modified
+      if (dataBufferIndex == DATABUFFERSIZE)
+      {
+        //Oops, our index is pointing to an array element outside our buffer.
+        dataBufferIndex = 0;
+        break;
+      }
+      if (incomingbyte == endChar)
+      {
+        dataBuffer[dataBufferIndex] = 0; //null terminate the C string
+        //Our data string is complete.  return true
+        Serial.println("Value of dataBuffer");
+        Serial.println(dataBuffer);
+        return true;
+      }
+      else
+      {
+        dataBuffer[dataBufferIndex++] = incomingbyte;
+        dataBuffer[dataBufferIndex] = 0; //null terminate the C string   //<Hello, 10.5, 21>
+      }
+    }
+    else
+    {
+
+    }
+    if (incomingbyte == startChar)
+    {
+      dataBufferIndex = 0;  //Initialize our dataBufferIndex variable
+      storeString = true;
+      Serial.println("Value of storeString");
+      Serial.print(storeString);
+      delay(2500);
+    }
+    i = i + 1;
+  }
+
+  //We've read in all the available Serial data, and don't have a valid string yet, so return false
+  return false;
+}
 
