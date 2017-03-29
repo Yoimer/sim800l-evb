@@ -38,11 +38,18 @@ char startChar = '#'; // or '!', or whatever your start character is
 char endChar = '#';
 boolean storeString = false; //This will be our flag to put the data in our buffer
 
-int const DATABUFFERSIZE = 200;
-char dataBuffer[201]; //Add 1 for NULL terminator
+int const DATABUFFERSIZE = 230;  //15 phonenumbers
+static char dataBuffer[DATABUFFERSIZE + 1]; //Add 1 for NULL terminator
 byte dataBufferIndex = 0;
 
-char response [350];
+////char response [350];
+char response [DATABUFFERSIZE + 1];
+
+char* wordlist;
+char* phoneNumber[12];
+
+byte oldNumber;
+byte newNumber;
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
 
@@ -146,13 +153,21 @@ void GetWhiteList()
   len = strlen(response);
   len = len + 1;
   getSerialString();
+  parseSerialString();
 
-  
-//  Serial.print("Printing for loop:");
-//  for (i = 0; i < len; ++i)
-//  {
-//    Serial.print(response[i]);
-//  }
+
+  //  wordlist = strtok(dataBuffer, ",");
+  //  Serial.print("Printing wordlist:");
+  //  Serial.println(wordlist);
+  //  newNumber = atoi(wordlist);
+  //  Serial.print("Printing newNumber :");
+  //  Serial.println(newNumber);
+
+  //  Serial.print("Printing for loop:");
+  //  for (i = 0; i < len; ++i)
+  //  {
+  //    Serial.print(response[i]);
+  //  }
 
   //gprs.cleanBuffer(response, sizeof(response));
   //readData(response, sizeof(response), 60000);
@@ -184,7 +199,7 @@ boolean getSerialString()
   static byte dataBufferIndex = 0;
   i = 0;
   ////while (Serial.available() > 0)
-  while(i < len )
+  while (i < len )
   {
     ////char incomingbyte = Serial.read();
     Serial.println("On while loop...");
@@ -222,9 +237,6 @@ boolean getSerialString()
     {
       dataBufferIndex = 0;  //Initialize our dataBufferIndex variable
       storeString = true;
-      Serial.println("Value of storeString");
-      Serial.print(storeString);
-      delay(2500);
     }
     i = i + 1;
   }
@@ -232,4 +244,50 @@ boolean getSerialString()
   //We've read in all the available Serial data, and don't have a valid string yet, so return false
   return false;
 }
+////////////////////////////////////////////////////////////////////////////
+void parseSerialString()
+{
+  Serial.println("On parseSerialString...");
+  wordlist = strtok(dataBuffer, ",");  //Extracts first comma
+  Serial.print("Printing wordlist:");
+  Serial.println(wordlist);
+  oldNumber = atoi(wordlist);         //Converts first number into an integer
+  Serial.print("Printing oldNumber :");
+  Serial.println(oldNumber);
+  wordlist = strtok(NULL, ",");      //Extracts second comma
+  newNumber = atoi(wordlist);       //Converts second number into an integer
+  Serial.print("Printing newNumber :");
+  Serial.println(newNumber);
+}
+
+
+
+
+
+
+//void parseSerialString()
+//{
+//    char* word;
+//    word = strtok(dataBuffer, ",");
+//    int oldNumber = atoi(word);
+//
+//    word = strtok(NULL, ",");
+//    int newNumber = atoi(word);
+//
+//    char* phoneNumber[250];
+//    cleanBuffer(phoneNumber, sizeof(phoneNumber));
+//    static int phoneNumberIndex = 0;
+//    while ((word = strtok(NULL, ",")) != NULL)
+//  {
+//    phoneNumber[phoneNumberIndex++] = word;
+//    phoneNumber[phoneNumberIndex] = 0; //null terminate the C string
+//  }
+//
+//    int j;
+//  for( j = 0; j < newNumber; ++j)
+//    {
+//       printf("PhoneNumber: %s\n", phoneNumber[j]);
+//    }
+//}
+
 
