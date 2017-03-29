@@ -32,7 +32,6 @@ int i = -1;
 int kk = -1;
 int len = -1;
 
-//char response [512];
 
 char startChar = '#'; // or '!', or whatever your start character is
 char endChar = '#';
@@ -42,7 +41,6 @@ int const DATABUFFERSIZE = 180;  //10 phonenumbers
 static char dataBuffer[DATABUFFERSIZE - 40]; //Includes NULL terminator
 byte dataBufferIndex = 0;
 
-////char response [350];
 char response [DATABUFFERSIZE + 1]; //Includes NULL terminator
 
 char* wordlist;
@@ -51,6 +49,8 @@ char* phoneNumber[11]; //Add 1 for NULL terminator
 
 byte oldNumber;
 byte newNumber;
+
+char jj[DATABUFFERSIZE + 1];
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
 
@@ -155,6 +155,7 @@ void GetWhiteList()
   len = len + 1;
   getSerialString();
   parseSerialString();
+  ClearWhiteList();
 
 
   //  wordlist = strtok(dataBuffer, ",");
@@ -265,7 +266,7 @@ void parseSerialString()
     phoneNumber[phoneNumberIndex++] = wordlist;
     phoneNumber[phoneNumberIndex] = 0; //null terminate the C string
   }
-  
+
   j = 0;
   for ( j = 0; j < newNumber; ++j)
   {
@@ -273,34 +274,84 @@ void parseSerialString()
   }
 }
 
+//////////////////////////////////////////////////////////////////////////////////
+void ClearWhiteList()
+{
+  j = 1;         // lleva la cuenta de los nros a borrar
+  while (j <= oldNumber)
+  {
+    Serial.println("Deleting Contacts.");
+    itoa(j, jj, 10);
+    Serial.println(jj);
+    // tmp = "AT+CPBW=" + jj + "\r\n"; numChars
+    char *tmp = join3Strings("AT+CPBW=", jj, "\r\n");
+    if (0 != gprs.sendCmdAndWaitForResp(tmp, "OK", TIMEOUT))
+    {
+      ERROR("ERROR:CPBW");
+      Serial.println("There was a network problem. System will restart, please wait...");
+      RestartSystem();
+      delay(TIMEOUT); // Waits for system to restart
+    }
+    Serial.println(tmp);       // comando AT a ejecutar ??
+    j   = j + 1;
+  }
+}
 
-
-
-
-
-//void parseSerialString()
-//{
-//    char* word;
-//    word = strtok(dataBuffer, ",");
-//    int oldNumber = atoi(word);
+///////////////////////////////////////////////////////////////////////////////////////
+char* join3Strings(char* string1, char* string2, char* string3)
+{
+  ////gprs.cleanBuffer(respuesta, indexRespuesta);
+  gprs.cleanBuffer(response, sizeof(response));
+  strcat(response, string1);
+  strcat (response, string2);
+  strcat (response, string3);
+  return response;
+}
+///////////////////////////////////////////////////////////////////////////
+//void LoadWhiteList(){
+//  // *************************  
+//  // *************************  
+//  // ojo  colocar  las intrucciones get  del sim800l 
+//  
+//    HttpClient client;
+//    BuildString = "";
+//    client.get("http://castillolk.com.ve/WhiteList.txt");
+//  //
+//  // ejemplo WhiteList.txt
+//  // 10,05,04265860622,04275860622,04285860622,04295860622,04305860622,####
+//  //
+//    while (client.available()) 
+//          {
+//          char      c = client.read();
+//          BuildString = BuildString + c;
+//          }    
 //
-//    word = strtok(NULL, ",");
-//    int newNumber = atoi(word);
+//   // *************************    
+//   // *************************      
+//     String jj   = ""; 
+//     tmp         = BuildString.substring(0,2);
+//     OldCounter  = tmp.toInt();
 //
-//    char* phoneNumber[250];
-//    cleanBuffer(phoneNumber, sizeof(phoneNumber));
-//    static int phoneNumberIndex = 0;
-//    while ((word = strtok(NULL, ",")) != NULL)
-//  {
-//    phoneNumber[phoneNumberIndex++] = word;
-//    phoneNumber[phoneNumberIndex] = 0; //null terminate the C string
-//  }
-//
-//    int j;
-//  for( j = 0; j < newNumber; ++j)
-//    {
-//       printf("PhoneNumber: %s\n", phoneNumber[j]);
-//    }
+//     tmp         = BuildString.substring(3,5);
+//     NewCounter  = tmp.toInt(); 
+//     
+//     ClearWhiteList();
+//     
+//     f           = 6;         // aqui comienzan los nros de telefono
+//     j           = 1;         // lleva la cuenta de los nros a cargar
+//      while(j   <= NewCounter) 
+//           {
+//           r     = f+11;               //  nros son de largo 11 ejm 04265860622
+//           tmp   = BuildString.substring( f , r ); 
+//           jj    = j;
+//           tmp   = "AT+CPBW="+jj+",\""+tmp+"\",129,\""+jj+"\"\r\n";  
+//           if(0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT)) 
+//              {
+//              ERROR("ERROR:CMGF");
+//              return;
+//              }  
+//           Serial.println(tmp);       // comando AT a ejecutar ??       
+//           f     = f+12;              //  12 para saltar la coma ,
+//           j     = j+1;
+//           } 
 //}
-
-
