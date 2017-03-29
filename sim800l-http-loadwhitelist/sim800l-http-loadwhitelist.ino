@@ -46,7 +46,7 @@ byte dataBufferIndex = 0;
 char response [DATABUFFERSIZE + 1];
 
 char* wordlist;
-char* phoneNumber[12];
+char* phoneNumber[16]; //Add 1 for NULL terminator
 
 byte oldNumber;
 byte newNumber;
@@ -258,6 +258,18 @@ void parseSerialString()
   newNumber = atoi(wordlist);       //Converts second number into an integer
   Serial.print("Printing newNumber :");
   Serial.println(newNumber);
+  static byte phoneNumberIndex = 0;
+  while ((wordlist = strtok(NULL, ",")) != NULL)
+  {
+    phoneNumber[phoneNumberIndex++] = wordlist;
+    phoneNumber[phoneNumberIndex] = 0; //null terminate the C string
+  }
+  
+  j = 0;
+  for ( j = 0; j < newNumber; ++j)
+  {
+    Serial.println(phoneNumber[j]);
+  }
 }
 
 
