@@ -38,15 +38,16 @@ char startChar = '#'; // or '!', or whatever your start character is
 char endChar = '#';
 boolean storeString = false; //This will be our flag to put the data in our buffer
 
-int const DATABUFFERSIZE = 230;  //15 phonenumbers
-static char dataBuffer[DATABUFFERSIZE + 1]; //Add 1 for NULL terminator
+int const DATABUFFERSIZE = 180;  //10 phonenumbers
+static char dataBuffer[DATABUFFERSIZE - 40]; //Includes NULL terminator
 byte dataBufferIndex = 0;
 
 ////char response [350];
-char response [DATABUFFERSIZE + 1];
+char response [DATABUFFERSIZE + 1]; //Includes NULL terminator
 
 char* wordlist;
-char* phoneNumber[16]; //Add 1 for NULL terminator
+//DATABUFFERPHONENUMBER = 10
+char* phoneNumber[11]; //Add 1 for NULL terminator
 
 byte oldNumber;
 byte newNumber;
