@@ -329,29 +329,19 @@ void LoadWhiteList()
   j = 0;
   while (j < newNumber)
   {
-    Serial.println("On LoadWhiteList() loop");
+    //Serial.println("On LoadWhiteList() loop");
     itoa(j + 1, jj, 10);
     Serial.println(jj);
-    char *tmp = join7Strings("AT+CPBW=", jj, ",\"", phoneNumber[j], "\",129,\"" ,jj ,"\"\r\n");
+    char *tmp = join7Strings("AT+CPBW=", jj, ",\"", phoneNumber[j], "\",129,\"" , jj , "\"\r\n");
     Serial.println(tmp);
 
-
-    //Serial.println(tmp);
-//    if (0 != gprs.sendCmdAndWaitForResp(tmp, "OK", TIMEOUT))
-//    {
-//      ERROR("ERROR:CPBW");
-//      Serial.println("There was a network problem. System will restart, please wait...");
-//      RestartSystem();
-//      delay(TIMEOUT); // Waits for system to restart
-//    }
-
-    //    tmp   = "AT+CPBW=" + jj + ",\"" + tmp + "\",129,\"" + jj + "\"\r\n";
-    //    if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-    //    {
-    //      ERROR("ERROR:CMGF");
-    //      return;
-    //    }
-    //    Serial.println(tmp);       // comando AT a ejecutar ??
+    if (0 != gprs.sendCmdAndWaitForResp(tmp, "OK", TIMEOUT))
+    {
+      ERROR("ERROR:CPBW");
+      Serial.println("There was a network problem. System will restart, please wait...");
+      RestartSystem();
+      delay(TIMEOUT); // Waits for system to restart
+    }
 
     j = j + 1;
   }
