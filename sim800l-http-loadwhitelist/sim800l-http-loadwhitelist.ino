@@ -309,12 +309,17 @@ char* join3Strings(char* string1, char* string2, char* string3)
   return response;
 }
 ///////////////////////////////////////////////////////////////////////////
-char* join2Strings(char* string1, char* string2)
+char* join7Strings(char* string1, char* string2, char* string3, char* string4, char* string5, char* string6, char* string7)
 {
   ////gprs.cleanBuffer(respuesta, indexRespuesta);
   gprs.cleanBuffer(response, sizeof(response));
   strcat(response, string1);
   strcat (response, string2);
+  strcat (response, string3);
+  strcat (response, string4);
+  strcat (response, string5);
+  strcat (response, string6);
+  strcat (response, string7);
   return response;
 }
 //////////////////////////////////////////////////////////////////
@@ -327,19 +332,10 @@ void LoadWhiteList()
     Serial.println("On LoadWhiteList() loop");
     itoa(j + 1, jj, 10);
     Serial.println(jj);
-    ////Serial.println(phoneNumber[j]);
-    char *tmp = join3Strings("AT+CPBW=", jj, ",\"");
-    Serial.print(tmp);
-    *tmp = join3Strings(phoneNumber[j], "\",129,\"", "t"\""");
+    char *tmp = join7Strings("AT+CPBW=", jj, ",\"", phoneNumber[j], "\",129,\"" ,jj ,"\"\r\n");
     Serial.println(tmp);
-//    *tmp = join2Strings("z", "A");
-//    Serial.println(tmp);
-    //strcat(*tmp, "\"\"");
-
-    //"\""
 
 
-    
     //Serial.println(tmp);
 //    if (0 != gprs.sendCmdAndWaitForResp(tmp, "OK", TIMEOUT))
 //    {
