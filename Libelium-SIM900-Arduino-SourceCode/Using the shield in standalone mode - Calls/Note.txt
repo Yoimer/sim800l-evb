@@ -1,0 +1,5 @@
+Originating and receiving voice calls
+
+The code example and the connection diagram shown below are used to originate a voice call and, pushing a button, 
+end that voice call. The button is connected between digital pin 12 an ground. 
+A 10kO pull-up resistor is needed at this pin.

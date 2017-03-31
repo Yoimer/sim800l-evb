@@ -1,0 +1,316 @@
+/*  
+ *  GPRS/GSM Quadband Module (SIM900)
+ *  
+ *  Copyright (C) Libelium Comunicaciones Distribuidas S.L. 
+ *  http://www.libelium.com 
+ *  
+ *  This program is free software: you can redistribute it and/or modify 
+ *  it under the terms of the GNU General Public License as published by 
+ *  the Free Software Foundation, either version 3 of the License, or 
+ *  (at your option) any later version. 
+ *  a
+ *  This program is distributed in the hope that it will be useful, 
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License 
+ *  along with this program.  If not, see http://www.gnu.org/licenses/. 
+ *  
+ *  Version:           2.0
+ *  Design:            David Gascón 
+ *  Implementation:    Alejandro Gallego & Marcos Martinez
+ */
+
+
+int8_t answer;
+int onModulePin = 2;
+char aux_str[50];
+
+char pin[]="*******";
+char apn[]="*******";
+char user_name[]="*******";
+char password[]="*******";
+char ftp_server[]="*******";
+char ftp_user_name[]="*******";
+char ftp_password[]="*******";
+char path[]="/*******/";
+
+char incoming_data[120];
+
+char file_name[ ]="test.txt";
+char test_str[ ]= "0000000011111111222222223333333344444444555555556666666677777777000000001111111122222222333333334444";
+
+int data_size, aux;
+
+
+void setup(){
+
+    pinMode(onModulePin, OUTPUT);
+    Serial.begin(115200);  
+
+
+    Serial.println("Starting...");
+    power_on();
+
+    delay(5000);
+    
+    //sets the PIN code
+    snprintf(aux_str, sizeof(aux_str), "AT+CPIN=%s", pin);
+    sendATcommand(aux_str, "OK", 2000);
+
+    Serial.println("Connecting to the network...");
+
+    while( (sendATcommand("AT+CREG?", "+CREG: 0,1", 500) 
+            || sendATcommand("AT+CREG?", "+CREG: 0,5", 500)) == 0 );
+
+    configure_FTP();
+
+    uploadFTP();
+
+    downloadFTP();
+
+    Serial.print("Incoming data: ");
+    Serial.println(incoming_data);
+}
+
+
+void loop(){
+
+}
+
+
+void configure_FTP(){
+  
+    // sets APN, user name and password
+    sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"", "OK", 2000);
+    snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"", apn);
+    sendATcommand(aux_str, "OK", 2000);
+    
+    snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"USER\",\"%s\"", user_name);
+    sendATcommand(aux_str, "OK", 2000);
+    
+    snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"PWD\",\"%s\"", password);
+    sendATcommand(aux_str, "OK", 2000);
+  
+    // sets the paremeters for the FTP server
+    while (sendATcommand("AT+SAPBR=1,1", "OK", 20000) != 1);
+    sendATcommand("AT+FTPCID=1", "OK", 2000);
+    snprintf(aux_str, sizeof(aux_str), "AT+FTPSERV=\"%s\"", ftp_server);
+    sendATcommand(aux_str, "OK", 2000);
+    sendATcommand("AT+FTPPORT=21", "OK", 2000);
+    snprintf(aux_str, sizeof(aux_str), "AT+FTPUN=\"%s\"", ftp_user_name);
+    sendATcommand(aux_str, "OK", 2000);
+    snprintf(aux_str, sizeof(aux_str), "AT+FTPPW=\"%s\"", ftp_password);
+    sendATcommand(aux_str, "OK", 2000);
+    
+    
+    
+}
+
+
+void uploadFTP(){
+    
+    snprintf(aux_str, sizeof(aux_str), "AT+FTPPUTNAME=\"%s\"", file_name);
+    sendATcommand(aux_str, "OK", 2000);
+    snprintf(aux_str, sizeof(aux_str), "AT+FTPPUTPATH=\"%s\"", path);
+    sendATcommand(aux_str, "OK", 2000);  
+    if (sendATcommand("AT+FTPPUT=1", "+FTPPUT:1,1,", 30000) == 1)
+    {
+        data_size = 0;
+        while(Serial.available()==0);
+        aux = Serial.read();
+        do{
+            data_size *= 10;
+            data_size += (aux-0x30);
+            while(Serial.available()==0);
+            aux = Serial.read();        
+        }
+        while(aux != 0x0D);
+
+        if (data_size >= 100)
+        {
+            if (sendATcommand("AT+FTPPUT=2,100", "+FTPPUT:2,100", 30000) == 1)
+            {
+                sendATcommand(test_str, "+FTPPUT:1,1", 30000);          
+                sendATcommand("AT+FTPPUT=2,0", "+FTPPUT:1,0", 30000);
+                Serial.println("Upload done!!");
+            }
+            else 
+            {
+                sendATcommand("AT+FTPPUT=2,0", "OK", 30000);                    
+            }
+        }
+        else
+        {
+            sendATcommand("AT+FTPPUT=2,0", "OK", 30000); 
+        }
+    }
+    else
+    {
+        Serial.println("Error opening the FTP session");
+    }
+}
+
+void downloadFTP(){
+
+    int x = 0;
+    snprintf(aux_str, sizeof(aux_str), "AT+FTPGETNAME=\"%s\"", file_name);
+    sendATcommand(aux_str, "OK", 2000); 
+    snprintf(aux_str, sizeof(aux_str), "AT+FTPGETPATH=\"%s\"", path);
+    sendATcommand(aux_str, "OK", 2000); 
+    
+    if (sendATcommand("AT+FTPGET=1 ", "+FTPGET:1,1", 30000) == 1)
+    {
+        do{
+            if (sendATcommand2("AT+FTPGET=2,50", "+FTPGET:2,", "+FTPGET:1,", 30000) == 1)
+            {
+                data_size = 0;
+                while(Serial.available()==0);
+                aux = Serial.read();
+                do{
+                    data_size *= 10;
+                    data_size += (aux-0x30);
+                    while(Serial.available()==0);
+                    aux = Serial.read();        
+                }while(aux != 0x0D);
+
+                Serial.print("Data received: ");
+                Serial.println(data_size);
+
+                if (data_size > 0)
+                {
+                    while(Serial.available() < data_size);
+                    Serial.read();
+
+                    for (int y = 0; y < data_size; y++)
+                    {
+                        incoming_data[x] = Serial.read();
+                        x++;
+                    }
+                    incoming_data[x] = '\0';
+                }
+                else
+                {
+                    Serial.println("Download finished");    
+                }
+            }
+            else if (answer == 2)
+            {
+                Serial.println("Error from FTP");
+            }
+            else
+            {
+                Serial.println("Error getting the file");
+                data_size = 0;
+            }
+        }while (data_size > 0);
+    }
+    else
+    {
+        Serial.println("Error opening the FTP session");
+    }
+}
+
+
+
+
+void power_on(){
+
+    uint8_t answer=0;
+    
+    // checks if the module is started
+    answer = sendATcommand("AT", "OK", 2000);
+    if (answer == 0)
+    {
+        digitalWrite(onModulePin,HIGH);
+        delay(3000);
+        digitalWrite(onModulePin,LOW);
+    
+        while(answer == 0){     // Send AT every two seconds and wait for the answer
+            answer = sendATcommand("AT", "OK", 2000);    
+        }
+    }
+}
+
+
+int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeout){
+
+    uint8_t x=0,  answer=0;
+    char response[100];
+    unsigned long previous;
+
+    memset(response, '\0', 100);    // Initialize the string
+
+    delay(100);
+
+    while( Serial.available() > 0) Serial.read();    // Clean the input buffer
+
+    Serial.println(ATcommand);    // Send the AT command 
+
+
+        x = 0;
+    previous = millis();
+
+    // this loop waits for the answer
+    do{
+        if(Serial.available() != 0){    
+            // if there are data in the UART input buffer, reads it and checks for the asnwer
+            response[x] = Serial.read();
+            //Serial.print(response[x]);
+            x++;
+            // check if the desired answer  is in the response of the module
+            if (strstr(response, expected_answer) != NULL)    
+            {
+                answer = 1;
+            }
+        }
+    }
+    // Waits for the asnwer with time out
+    while((answer == 0) && ((millis() - previous) < timeout));    
+
+        return answer;
+}
+
+int8_t sendATcommand2(char* ATcommand, char* expected_answer1, 
+            char* expected_answer2, unsigned int timeout){
+
+    uint8_t x=0,  answer=0;
+    char response[100];
+    unsigned long previous;
+
+    memset(response, '\0', 100);    // Initialize the string
+
+    delay(100);
+
+    while( Serial.available() > 0) Serial.read();    // Clean the input buffer
+
+    Serial.println(ATcommand);    // Send the AT command 
+
+
+        x = 0;
+    previous = millis();
+
+    // this loop waits for the answer
+    do{ 
+        // if there are data in the UART input buffer, reads it and checks for the asnwer
+        if(Serial.available() != 0){               
+            response[x] = Serial.read();
+            x++;
+            // check if the desired answer 1 is in the response of the module
+            if (strstr(response, expected_answer1) != NULL)    
+            {
+                answer = 1;
+            }
+            // check if the desired answer 2 is in the response of the module
+            if (strstr(response, expected_answer2) != NULL)    
+            {
+                answer = 2;
+            }
+        }
+        // Waits for the asnwer with time out
+    }while((answer == 0) && ((millis() - previous) < timeout));    
+
+        return answer;
+}
+    
