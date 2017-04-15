@@ -8,7 +8,7 @@
 */
 
 int onModulePin = 13;
-
+int8_t answer;
 void setup() {
 
   pinMode(onModulePin, OUTPUT);
@@ -21,7 +21,10 @@ void setup() {
 
   Serial.println("Connecting to the network...");
   
-  while (sendATcommand2("AT+CREG?", "+CREG: 0,1", "+CREG: 0,5", 2000) == 0);
+  //while (sendATcommand2("AT+CREG?", "+CREG: 0,1", "+CREG: 0,5", 2000) == 0);
+  answer = contacsOnSim("AT+CPBR=1,15", "OK", 1000);
+  Serial.print(answer);
+  delay(10000);
 
   //while ( (sendATcommand("AT+CREG?", "+CREG: 0,1", 500) || sendATcommand("AT+CREG?", "+CREG: 0,5", 500)) == 0 );
 
@@ -140,4 +143,55 @@ int8_t sendATcommand2(char* ATcommand, char* expected_answer1, char* expected_an
 
   return answer;
 }
+//////////////////////////////////////////////////////////////////////////////////////////
+int8_t contacsOnSim(char* ATcommand, char* expected_answer, unsigned int timeout) {
 
+  uint8_t x = 0,  answer = 0;
+  char response[512];
+  unsigned long previous;
+
+  memset(response, '\0', 512);    // Initialize the string
+
+  delay(100);
+
+  //while ( Serial.available() > 0) Serial.read();   // Clean the input buffer
+
+  while (Serial.available()) { //Cleans the input buffer
+    Serial.read();
+  }
+
+  Serial.println(ATcommand);    // Send the AT command
+
+
+  x = 0;
+  previous = millis();
+
+  // this loop waits for the answer
+  while (strstr(response, expected_answer) == NULL)
+  {
+    if (Serial.available() != 0) {
+      char c = Serial.read();
+      response[x] = c;
+      x++;
+      if (c == ':'){
+       answer = answer + 1;
+      }
+    }
+  }
+  
+//  do {
+//    if (Serial.available() != 0) {
+//      // if there are data in the UART input buffer, reads it and checks for the asnwer
+//      response[x] = Serial.read();
+//      x++;
+//      // check if the desired answer  is in the response of the module
+//      if (strstr(response, expected_answer) != NULL)
+//      {
+//        answer = 1;
+//      }
+//    }
+//    // Waits for the asnwer with time out
+//  } while ((answer == 0) && ((millis() - previous) < timeout));
+
+  return answer;
+}
