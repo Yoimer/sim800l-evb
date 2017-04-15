@@ -1,10 +1,10 @@
 /*
-  Author: Dhanish
-  Created on: 19-08-2014
-  Company: Elementz Engineers Guild Pvt Ltd
-  Run this code only after SIM800 Module has powered and connected to a Network.
-  Please make a call to the module knowing whether the connection is established.
-  If connected a ring will be heard at the caller end
+  Author: Yoimer David Román Figueroa
+  Created on: 15/04/2017 (American Format)
+  Company: NextWells
+  This code checks SIM800 physical connection and determines
+  amount on contact on sim card
+  
 */
 
 int onModulePin = 13;
@@ -20,20 +20,19 @@ void setup() {
   delay(3000);
 
   Serial.println("Connecting to the network...");
-  
-  //while (sendATcommand2("AT+CREG?", "+CREG: 0,1", "+CREG: 0,5", 2000) == 0);
-  answer = contacsOnSim("AT+CPBR=1,15", "OK", 1000);
+
+  while (sendATcommand2("AT+CREG?", "+CREG: 0,1", "+CREG: 0,5", 2000) == 0);
+
+  answer = contacsOnSim("AT+CPBR=1,250", "OK", ':', 10000); 
   Serial.print(answer);
   delay(10000);
-
-  //while ( (sendATcommand("AT+CREG?", "+CREG: 0,1", 500) || sendATcommand("AT+CREG?", "+CREG: 0,5", 500)) == 0 );
-
-  //  delay(10000);
-  //  // print the serial data to GSM
-  //  Serial.print("\r\nATD04168262667;\r\n" ); // change here to call a number using SIM800
-  //  // wait 10 seconds before the next loop
-  //  delay(10000);
-  //  Serial.print("\r\nATH\r\n" ); // hold the call
+  /*
+   * answer == 0 could be caused by (not finding expected_answer and not finding expected_char) 
+   * or not having even a simple contact on sim.
+   *  Even when expected_answer is not found but expected_char is,
+   *  function will leave by time expiration and answer will be
+   *  the amount of contacts on sim
+  */
 }
 
 void loop() {
@@ -111,7 +110,7 @@ int8_t sendATcommand2(char* ATcommand, char* expected_answer1, char* expected_an
   delay(100);
 
   //while ( Serial.available() > 0) Serial.read();   // Clean the input buffer
-  
+
   while (Serial.available()) { //Cleans the input buffer
     Serial.read();
   }
@@ -144,13 +143,15 @@ int8_t sendATcommand2(char* ATcommand, char* expected_answer1, char* expected_an
   return answer;
 }
 //////////////////////////////////////////////////////////////////////////////////////////
-int8_t contacsOnSim(char* ATcommand, char* expected_answer, unsigned int timeout) {
+int8_t contacsOnSim(char* ATcommand, char* expected_answer, char* expected_char, unsigned int timeout) {
 
   uint8_t x = 0,  answer = 0;
-  char response[512];
+  char response[1024]; //Change to 512 if problems appear. The same applies to memset
+                       // The smallest this number is, less amount of contacts can be proccessed.
+                       // this is due to buffer size on hardwareserial.
   unsigned long previous;
 
-  memset(response, '\0', 512);    // Initialize the string
+  memset(response, '\0', 1024);    // Initialize the string
 
   delay(100);
 
@@ -167,31 +168,23 @@ int8_t contacsOnSim(char* ATcommand, char* expected_answer, unsigned int timeout
   previous = millis();
 
   // this loop waits for the answer
-  while (strstr(response, expected_answer) == NULL)
+  while ((strstr(response, expected_answer) == NULL) && ((millis() - previous) < timeout))
   {
-    if (Serial.available() != 0) {
+    while (Serial.available() != 0)
+    {
+      // if there is data in the UART input buffer, reads it and checks for the answer
       char c = Serial.read();
       response[x] = c;
       x++;
-      if (c == ':'){
-       answer = answer + 1;
+      // checks for a colon in the UART the buffer, when found; it increments answer.
+      // Every contact has a colon on the whole string
+      //+CPBR: 1,"04168262645",129,"1"
+      //+CPBR: 2,"02126421011",129,"2"
+      if (c == expected_char) // Checks :
+      {
+        answer = answer + 1;
       }
     }
   }
-  
-//  do {
-//    if (Serial.available() != 0) {
-//      // if there are data in the UART input buffer, reads it and checks for the asnwer
-//      response[x] = Serial.read();
-//      x++;
-//      // check if the desired answer  is in the response of the module
-//      if (strstr(response, expected_answer) != NULL)
-//      {
-//        answer = 1;
-//      }
-//    }
-//    // Waits for the asnwer with time out
-//  } while ((answer == 0) && ((millis() - previous) < timeout));
-
   return answer;
 }
