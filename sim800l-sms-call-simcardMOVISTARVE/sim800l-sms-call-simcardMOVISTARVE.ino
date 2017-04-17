@@ -290,6 +290,10 @@ void LastLineIsCMT()
       {
         Serial.println("Go to ADD routine");
       }
+      else if (lastLine.indexOf("DEL") >= 0)
+      {
+        Serial.println("Go to DEL routine");
+      }
     }
     CleanCurrentLine();
     nextLineIsMessage = false;
