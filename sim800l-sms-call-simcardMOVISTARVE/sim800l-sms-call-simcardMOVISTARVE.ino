@@ -368,4 +368,10 @@ void AddContact()
   Serial.println(indexAndName);
   String newContact = lastLine.substring(6, 17);  // Number to be saved on SIM
   Serial.println(newContact);
+  //tmp = "AT+CPBW=1,\""+tmp+"\",129,\""+j+"\r\n\"";
+  // AT+CPBW=1,"04168262667",129,"Yoimer"
+  //tmp = "AT+CPBW=" + indexAndName + ",\""+newContact+"\",\129,\"" + indexAndName + "\r\n\"";
+  tmp = "AT+CPBW=" + indexAndName + ",\""+newContact+"\"" + ",129," + "\""+indexAndName+"\"";
+  Serial.println(tmp);
+  
 }
