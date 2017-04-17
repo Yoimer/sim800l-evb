@@ -289,6 +289,7 @@ void LastLineIsCMT()
       else if (lastLine.indexOf("ADD") >= 0)
       {
         Serial.println("Go to ADD routine");
+        AddContact();
       }
       else if (lastLine.indexOf("DEL") >= 0)
       {
@@ -360,4 +361,9 @@ void LastLineIsCLIP()
     nextValidLineIsCall = false;
   }
 }
-
+/////////////////////////////////////////////////////////////////////////////////////////
+void AddContact()
+{
+  String indexAndName = lastLine.substring(4, 5);   // Position and name to be saved on SIM
+  Serial.println(indexAndName);
+}
