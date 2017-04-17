@@ -366,4 +366,6 @@ void AddContact()
 {
   String indexAndName = lastLine.substring(4, 5);   // Position and name to be saved on SIM
   Serial.println(indexAndName);
+  String newContact = lastLine.substring(6, 17);  // Number to be saved on SIM
+  Serial.println(newContact);
 }
