@@ -286,6 +286,10 @@ void LastLineIsCMT()
       {
         ledStatus = 0;  // Turns OFF LED
       }
+      else if (lastLine.indexOf("ADD") >= 0)
+      {
+        Serial.println("Go to ADD routine");
+      }
     }
     CleanCurrentLine();
     nextLineIsMessage = false;
