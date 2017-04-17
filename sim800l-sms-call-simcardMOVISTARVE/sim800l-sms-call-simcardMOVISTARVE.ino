@@ -293,7 +293,8 @@ void LastLineIsCMT()
       }
       else if (lastLine.indexOf("DEL") >= 0)
       {
-        Serial.println("Go to DEL routine");
+        //Serial.println("Go to DEL routine");
+        DelContact();
       }
     }
     CleanCurrentLine();
@@ -368,6 +369,7 @@ void AddContact()
   //Serial.println(indexAndName);
   String newContact = lastLine.substring(6, 17);  // Number to be saved on SIM
   //Serial.println(newContact);
+  tmp = ""; // Cleans tmp
   tmp = "AT+CPBW=" + indexAndName + ",\"" + newContact + "\"" + ",129," + "\"" + indexAndName + "\"" + "\r\n\"";
   Serial.println(tmp);
   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
@@ -380,6 +382,24 @@ void AddContact()
   else
   {
     Serial.println("Added");
+  }
+
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+void DelContact()
+{
+  String indexAndName = lastLine.substring(4, 5);   // Position and name to be deleted on SIM
+  tmp = ""; // Cleans tmp
+  tmp = "AT+CPBW=" + indexAndName + "\r\n\"";
+  Serial.println(tmp);
+  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  {
+    ERROR("ERROR:CPBW");
+    Serial.println("No deleted.");
+  }
+  else
+  {
+    Serial.println("Deleted");
   }
 
 }
