@@ -370,9 +370,9 @@ void AddContact()
   secondComma = lastLine.indexOf(',', firstComma + 1);
   thirdComma = lastLine.indexOf(',', secondComma + 1);
   String indexAndName = lastLine.substring((firstComma + 1), (secondComma)); //Position and name to be saved on SIM
-  Serial.println(indexAndName);
+  //Serial.println(indexAndName);
   String newContact = lastLine.substring((secondComma + 1), thirdComma);  // Number to be saved on SIM
-  Serial.println(newContact);
+  //Serial.println(newContact);
   tmp = ""; // Cleans tmp
   tmp = "AT+CPBW=" + indexAndName + ",\"" + newContact + "\"" + ",129," + "\"" + indexAndName + "\"" + "\r\n\"";
   Serial.println(tmp);
@@ -389,7 +389,15 @@ void AddContact()
 /////////////////////////////////////////////////////////////////////////////////////////////
 void DelContact()
 {
-  String indexAndName = lastLine.substring(4, 5);   // Position and name to be deleted on SIM
+  //String indexAndName = lastLine.substring(4, 5);   // Position and name to be deleted on SIM
+  /////String indexAndName = lastLine.substring(4, 5);
+  firstComma = lastLine.indexOf(',');
+  secondComma = lastLine.indexOf(',', firstComma + 1);
+  thirdComma = lastLine.indexOf(',', secondComma + 1);
+  String indexAndName = lastLine.substring((firstComma + 1), (secondComma)); //Position and name to be saved on SIM
+  //Serial.println(indexAndName);
+  String newContact = lastLine.substring((secondComma + 1), thirdComma);  // Number to be saved on SIM
+  //Serial.println(newContact);
   tmp = ""; // Cleans tmp
   tmp = "AT+CPBW=" + indexAndName + "\r\n\"";
   Serial.println(tmp);
@@ -402,5 +410,4 @@ void DelContact()
   {
     Serial.println("Deleted");
   }
-
 }
