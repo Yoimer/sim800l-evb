@@ -374,10 +374,10 @@ void AddContact()
   Serial.println(tmp);
   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
   {
-    ERROR("ERROR:CPBW");
+    //ERROR("ERROR:CPBW");
     Serial.println("No added");
-    gprs.sendCmdAndWaitForResp("AT+CPOWD=1\r\n", "NORMAL POWER DOWN", TIMEOUT);
-    delay(TIMEOUT); // Waits for system to restart
+    //gprs.sendCmdAndWaitForResp("AT+CPOWD=1\r\n", "NORMAL POWER DOWN", TIMEOUT);
+    //delay(TIMEOUT); // Waits for system to restart
   }
   else
   {
@@ -394,7 +394,7 @@ void DelContact()
   Serial.println(tmp);
   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
   {
-    ERROR("ERROR:CPBW");
+    //ERROR("ERROR:CPBW");
     Serial.println("No deleted.");
   }
   else
