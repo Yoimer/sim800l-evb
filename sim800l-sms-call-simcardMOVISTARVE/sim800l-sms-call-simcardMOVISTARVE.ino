@@ -365,29 +365,26 @@ void LastLineIsCLIP()
 /////////////////////////////////////////////////////////////////////////////////////////
 void AddContact()
 {
-  /////String indexAndName = lastLine.substring(4, 5);   // Position and name to be saved on SIM
+  /////String indexAndName = lastLine.substring(4, 5);
   firstComma = lastLine.indexOf(',');
   secondComma = lastLine.indexOf(',', firstComma + 1);
   thirdComma = lastLine.indexOf(',', secondComma + 1);
-  String indexAndName = lastLine.substring((firstComma + 1), (secondComma));
+  String indexAndName = lastLine.substring((firstComma + 1), (secondComma)); //Position and name to be saved on SIM
   Serial.println(indexAndName);
   String newContact = lastLine.substring((secondComma + 1), thirdComma);  // Number to be saved on SIM
   Serial.println(newContact);
   tmp = ""; // Cleans tmp
   tmp = "AT+CPBW=" + indexAndName + ",\"" + newContact + "\"" + ",129," + "\"" + indexAndName + "\"" + "\r\n\"";
   Serial.println(tmp);
-//  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
-//  {
-//    //ERROR("ERROR:CPBW");
-//    Serial.println("No added");
-//    //gprs.sendCmdAndWaitForResp("AT+CPOWD=1\r\n", "NORMAL POWER DOWN", TIMEOUT);
-//    //delay(TIMEOUT); // Waits for system to restart
-//  }
-//  else
-//  {
-//    Serial.println("Added");
-//  }
-
+  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "OK", TIMEOUT))
+  {
+    //    //ERROR("ERROR:CPBW");
+    Serial.println("No added");
+  }
+  else
+  {
+    Serial.println("Added");
+  }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 void DelContact()
