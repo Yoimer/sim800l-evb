@@ -19,7 +19,7 @@
 
 //--------------------------------Start-Definition Section--------------------------------------------------//
 
-#define TIMEOUT    15000
+#define TIMEOUT    30000
 #define LED_PIN    13
 #define TIMEOUTINTERNET 30000
 
@@ -225,7 +225,7 @@ void endoflinereached()
     secondComma = lastLine.indexOf(',', firstComma + 1);
     Serial.println(secondComma); //For debugging
 
-    // +CMT: "+584168262667","","17/03/14,16:18:53-16" Telefónica Movistar Venezuela with no contacts saved
+    // +CMT: "+584168262667","","17/03/14,16:18:53-16" TelefÃ³nica Movistar Venezuela with no contacts saved
     //firstComma = 21
     //secondComma = 24
 
@@ -262,7 +262,7 @@ void LastLineIsCMT()
 
     // If exists on Phonebook
     //if (secondComma > 22)   // Only works with Movilnet and Digitel Venezuela
-    if (secondComma > 24)    // Only works with for Telefónica Movistar Venezuela
+    if (secondComma > 24)    // Only works with for TelefÃ³nica Movistar Venezuela
     {
       Serial.println("In Phonebook"); //For debugging
       isInPhonebook = true;
@@ -295,6 +295,11 @@ void LastLineIsCMT()
       {
         //Serial.println("Go to DEL routine");
         DelContact();
+      }
+      else if (lastLine.indexOf("N@P") >= 0)
+      {
+        Serial.println("Go to NumberAtPos routine");
+        NumberAtPosition();
       }
     }
     CleanCurrentLine();
@@ -411,3 +416,126 @@ void DelContact()
     Serial.println("Deleted");
   }
 }
+/////////////////////////////////////////////////////////////////////////////////////////
+void NumberAtPosition()
+{
+  firstComma = lastLine.indexOf(',');
+  secondComma = lastLine.indexOf(',', firstComma + 1);
+  String indexAndName = lastLine.substring((firstComma + 1), (secondComma)); //Position to be asked
+  Serial.println(indexAndName);
+  tmp = ""; // Cleans tmp
+  tmp = "AT+CPBR=" + indexAndName + "," + indexAndName + "\r\n\"";
+  //tmp = "AT+CPBR=1," + indexAndName + "\r\n\"";
+  //AT+CPBR=1,250
+
+  Serial.println(tmp);
+  if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "+CPBR:", TIMEOUT))
+  {
+    Serial.println("Not Good");
+  }
+  else
+  {
+    Serial.println("Good");
+    CleanCurrentLine();
+    lastLine = "";
+    currentLineIndex = 0;
+    while (gprs.serialSIM800.available())
+    {
+      gprs.serialSIM800.read();
+    }
+    sendATcommand(tmp.c_str(), "OK\r\n", TIMEOUT);
+
+    //gprs.sendCmd(tmp.c_str());
+    //delay(100);
+    //waitForResp2("+CPBR:", TIMEOUT);
+    //    while (gprs.serialSIM800.available())
+    //    {
+    //      // if there is data in the UART input buffer, reads it and checks for the answer
+    //      delay(100);
+    //      char c = gprs.serialSIM800.read();
+    //      delay(100);
+    //      currentLine[currentLineIndex] = c;
+    //      currentLineIndex++;
+    //    }
+    //    currentLine[currentLineIndex] = '\0';
+    //    Serial.println(currentLine);
+    //
+    //    //  lastLine = "";
+    //    //  delay(3000);
+    //    //  CleanCurrentLine();
+    //    //  currentLineIndex = 0;
+    //    //  //if (gprs.serialSIM800.available())
+    //    //  while (gprs.serialSIM800.available())
+    //    //  {
+    //    //    char lastCharRead = gprs.serialSIM800.read();
+    //    //    if (lastCharRead == '\r' || lastCharRead == '\n')
+    //    //    {
+    //    //      String lastLine = String(currentLine);
+    //    //      Serial.println(lastLine);
+    //    //      lastLine = "";
+    //    //      //lastLine = "";
+    //    //      //      if (lastLine.startsWith("+CPBR:"))
+    //    //      //      {
+    //    //      //        Serial.println(lastLine);
+    //    //      //        Serial.println("Existo");
+    //    //      //      }
+    //    //      //      else
+    //    //      //      {
+    //    //      //        Serial.println("NOPE");
+    //    //      //      }
+    //    //    }
+    //    //    else
+    //    //    {
+    //    //      currentLine[currentLineIndex++] = lastCharRead;
+    //    //    }
+    //    //  }
+  }
+}
+////////////////////////////////////////////////////////
+int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeout)
+{
+
+  uint8_t x = 0,  answer = 0;
+  char response[100];
+  unsigned long previous;
+
+  memset(response, '\0', 100);    // Initialice the string
+
+  delay(100);
+
+  while (gprs.serialSIM800.available())
+  {
+    gprs.serialSIM800.read();
+  }
+
+  Serial.println(ATcommand);    // Prints the AT command
+  gprs.sendCmd(ATcommand);
+
+
+  x = 0;
+  previous = millis();
+
+  // this loop waits for the answer
+  do
+  {
+    // if there are data in the UART input buffer, reads it and checks for the asnwer
+    if (gprs.serialSIM800.available() != 0)
+    {
+      response[x] = gprs.serialSIM800.read();
+      x++;
+      // check if the desired answer is in the response of the module
+      if (strstr(response, expected_answer) != NULL)
+      {
+        answer = 1;
+        Serial.println(response);
+        String REP = String(response);
+        Serial.println(REP);
+        if (REP.startsWith("+CPBR:"))
+        {
+          Serial.println("AA");
+        }
+      }
+    } // Waits for the asnwer with time out
+  } while ((answer == 0) && ((millis() - previous) < timeout));
+}
+
