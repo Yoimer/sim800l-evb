@@ -235,6 +235,9 @@ void endoflinereached()
     //firstComma = 21
     //secondComma = 24
 
+    Serial.println("Diff");
+    Serial.println(secondComma - firstComma);
+    
 
   }
   else if ((lastLine.length() > 0) && (nextLineIsMessage))       // Rejects any empty line
@@ -268,7 +271,8 @@ void LastLineIsCMT()
 
     // If exists on Phonebook
     //if (secondComma > 22)   // Only works with Movilnet and Digitel Venezuela
-    if (secondComma > 24)    // Only works with for TelefÃ³nica Movistar Venezuela
+    //if (secondComma > 24)    // Only works with for TelefÃ³nica Movistar Venezuela
+    if ((secondComma - firstComma) > 3)
     {
       Serial.println("In Phonebook"); //For debugging
       isInPhonebook = true;
@@ -498,11 +502,13 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
                       numbFromSim.indexOf(34, numbFromSim.indexOf(34) + 1)); //Final parser to extract phonenumber
      
         char SMS[12]; // 11 chars for phonumber plus null character
-        char phonenumber[14]; // 14 --> 13 chars (including +58) plus null character (ONLY Movistar Venezuela)
-                              // 12 --> 11 chars plus null character (ONLY Movilnet and Digitel Venezuela)
+        char phonenumber[14]; // NOT ANYLONGER 14 --> 13 chars (including +58) plus null character (ONLY Movistar Venezuela)
+                              // NOT ANYLONGER 12 --> 11 chars plus null character (ONLY Movilnet and Digitel Venezuela)
+                              // 14 ----> for any phonenumber that has 11 digits plus sign char and two digits as
+                              // international code number +5804168262669 for example)
                              
         numbFromSim.toCharArray(SMS, 12);
-        phonenum.toCharArray(phonenumber, 16);
+        phonenum.toCharArray(phonenumber, 14);
         gprs.sendSMS(phonenumber, SMS);
       }
     } // Waits for the asnwer with time out
