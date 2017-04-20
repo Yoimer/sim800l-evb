@@ -532,6 +532,9 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
         Test = Test.substring(Test.indexOf(":"), Test.indexOf("129"));
         Test = Test.substring((Test.indexOf(34) + 1), Test.indexOf(34, Test.indexOf(34) + 1));
         Serial.println(Test);
+        char SMS[12]; // 11 chars for phonumber plus null character
+        Test.toCharArray(SMS, 12);
+        gprs.sendSMS("+584168262667", SMS);
 
       }
     } // Waits for the asnwer with time out
