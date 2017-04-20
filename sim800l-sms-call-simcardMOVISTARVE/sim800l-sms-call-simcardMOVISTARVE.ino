@@ -86,8 +86,11 @@ int r = -1;
 int OldCounter = 0;
 int NewCounter = 0;
 
-// Temporal variable when using LoadWhiteList() ClearWhiteList()
+// Temporal variable 
 String tmp = "";
+
+// To be saved phonemumber who sent SMS
+String phonenum = "";
 
 
 //--------------------------------End-Variable Declaration-------------------------------------------//
@@ -217,6 +220,9 @@ void endoflinereached()
   else if (lastLine.startsWith("+CMT:"))                           // New incoming SMS
   {
     Serial.println(lastLine);
+    phonenum = lastLine.substring((lastLine.indexOf(34) + 1),   //Parser to extract phonenumber
+               lastLine.indexOf(34, lastLine.indexOf(34) + 1));
+    ////Serial.println(phonenum);
     nextLineIsMessage = true;
 
     // Parsing lastLine to determine registration on SIM card
@@ -298,7 +304,7 @@ void LastLineIsCMT()
       }
       else if (lastLine.indexOf("N@P") >= 0)
       {
-        Serial.println("Go to NumberAtPos routine");
+        //Serial.println("Go to NumberAtPos routine");
         NumberAtPosition();
       }
     }
@@ -422,13 +428,13 @@ void NumberAtPosition()
   firstComma = lastLine.indexOf(',');
   secondComma = lastLine.indexOf(',', firstComma + 1);
   String indexAndName = lastLine.substring((firstComma + 1), (secondComma)); //Position to be asked
-  Serial.println(indexAndName);
+  //Serial.println(indexAndName);
   tmp = ""; // Cleans tmp
   tmp = "AT+CPBR=" + indexAndName + "," + indexAndName + "\r\n\"";
   //tmp = "AT+CPBR=1," + indexAndName + "\r\n\"";
   //AT+CPBR=1,250
 
-  Serial.println(tmp);
+  ////Serial.println(tmp);
   if (0 != gprs.sendCmdAndWaitForResp(tmp.c_str(), "+CPBR:", TIMEOUT))
   {
     Serial.println("Not Good");
@@ -436,59 +442,14 @@ void NumberAtPosition()
   else
   {
     Serial.println("Good");
-    CleanCurrentLine();
-    lastLine = "";
-    currentLineIndex = 0;
+//    CleanCurrentLine();
+//    lastLine = "";
+//    currentLineIndex = 0;
     while (gprs.serialSIM800.available())
     {
       gprs.serialSIM800.read();
     }
     sendATcommand(tmp.c_str(), "OK\r\n", TIMEOUT);
-
-    //gprs.sendCmd(tmp.c_str());
-    //delay(100);
-    //waitForResp2("+CPBR:", TIMEOUT);
-    //    while (gprs.serialSIM800.available())
-    //    {
-    //      // if there is data in the UART input buffer, reads it and checks for the answer
-    //      delay(100);
-    //      char c = gprs.serialSIM800.read();
-    //      delay(100);
-    //      currentLine[currentLineIndex] = c;
-    //      currentLineIndex++;
-    //    }
-    //    currentLine[currentLineIndex] = '\0';
-    //    Serial.println(currentLine);
-    //
-    //    //  lastLine = "";
-    //    //  delay(3000);
-    //    //  CleanCurrentLine();
-    //    //  currentLineIndex = 0;
-    //    //  //if (gprs.serialSIM800.available())
-    //    //  while (gprs.serialSIM800.available())
-    //    //  {
-    //    //    char lastCharRead = gprs.serialSIM800.read();
-    //    //    if (lastCharRead == '\r' || lastCharRead == '\n')
-    //    //    {
-    //    //      String lastLine = String(currentLine);
-    //    //      Serial.println(lastLine);
-    //    //      lastLine = "";
-    //    //      //lastLine = "";
-    //    //      //      if (lastLine.startsWith("+CPBR:"))
-    //    //      //      {
-    //    //      //        Serial.println(lastLine);
-    //    //      //        Serial.println("Existo");
-    //    //      //      }
-    //    //      //      else
-    //    //      //      {
-    //    //      //        Serial.println("NOPE");
-    //    //      //      }
-    //    //    }
-    //    //    else
-    //    //    {
-    //    //      currentLine[currentLineIndex++] = lastCharRead;
-    //    //    }
-    //    //  }
   }
 }
 ////////////////////////////////////////////////////////
@@ -528,14 +489,21 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
       {
         answer = 1;
         //Serial.println(response);
-        String Test = String(response);
-        Test = Test.substring(Test.indexOf(":"), Test.indexOf("129"));
-        Test = Test.substring((Test.indexOf(34) + 1), Test.indexOf(34, Test.indexOf(34) + 1));
-        Serial.println(Test);
+        String numbFromSim = String(response);
+        
+        numbFromSim = numbFromSim.substring(numbFromSim.indexOf(":"), 
+                      numbFromSim.indexOf("129")); //First parser to extract phonenumber
+                      
+        numbFromSim = numbFromSim.substring((numbFromSim.indexOf(34) + 1), 
+                      numbFromSim.indexOf(34, numbFromSim.indexOf(34) + 1)); //Final parser to extract phonenumber
+     
         char SMS[12]; // 11 chars for phonumber plus null character
-        Test.toCharArray(SMS, 12);
-        gprs.sendSMS("+584168262667", SMS);
-
+        char phonenumber[14]; // 14 --> 13 chars (including +58) plus null character (ONLY Movistar Venezuela)
+                              // 12 --> 11 chars plus null character (ONLY Movilnet and Digitel Venezuela)
+                             
+        numbFromSim.toCharArray(SMS, 12);
+        phonenum.toCharArray(phonenumber, 16);
+        gprs.sendSMS(phonenumber, SMS);
       }
     } // Waits for the asnwer with time out
   } while ((answer == 0) && ((millis() - previous) < timeout));
