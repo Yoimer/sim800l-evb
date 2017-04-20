@@ -527,13 +527,12 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
       if (strstr(response, expected_answer) != NULL)
       {
         answer = 1;
-        Serial.println(response);
-        String REP = String(response);
-        Serial.println(REP);
-        if (REP.startsWith("+CPBR:"))
-        {
-          Serial.println("AA");
-        }
+        //Serial.println(response);
+        String Test = String(response);
+        Test = Test.substring(Test.indexOf(":"), Test.indexOf("129"));
+        Test = Test.substring((Test.indexOf(34) + 1), Test.indexOf(34, Test.indexOf(34) + 1));
+        Serial.println(Test);
+
       }
     } // Waits for the asnwer with time out
   } while ((answer == 0) && ((millis() - previous) < timeout));
