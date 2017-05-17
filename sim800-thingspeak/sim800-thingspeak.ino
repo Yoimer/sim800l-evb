@@ -52,14 +52,14 @@ void setup()
   snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);
   sendATcommand(aux_str, "OK\r\n", TIMEOUT);
   
-  attempts = 0;
+  attempts = 0; //tries 3 times
   while (sendATcommand("AT+SAPBR=1,1\r\n", "OK\r\n", TIMEOUT) == 0)
   {
 	delay(5000);
 	attempts = attempts + 1;
 	if(attempts > 2)
 	{
-		restartGPRS();
+		restartPhoneActivity();
 		attempts = 0;
 	}
   }
@@ -154,9 +154,19 @@ void power_on()
 }
 
 /////////////////////////////////////////////////////////
-void restartGPRS()
+void restartPhoneActivity()
 {
-	sendATcommand("AT+CFUN=0\r\n", "OK\r\n", TIMEOUT);
-	delay(5000);
-	while(sendATcommand("AT+CFUN=1\r\n", "Call Ready\r\n", 2*TIMEOUT) == 0);
+	/*answer = 0;
+	while(answer == 0)
+	{
+		sendATcommand("AT+CFUN=0\r\n", "OK\r\n", TIMEOUT);
+	    delay(5000);
+		answer = sendATcommand("AT+CFUN=1\r\n", "Call Ready\r\n", TIMEOUT);
+	}*/
+	do
+	{
+		sendATcommand("AT+CFUN=0\r\n", "OK\r\n", TIMEOUT);
+		delay(2000);
+		answer = sendATcommand("AT+CFUN=1\r\n", "Call Ready\r\n", TIMEOUT);
+	}while(answer == 0);
 } 
