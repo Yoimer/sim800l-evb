@@ -25,8 +25,11 @@ int attempts;
 
 char apn[] = "internet.movistar.ve";
 
-//char url[ ]="test.libelium.com/test-get-post.php?a=1&b=2";
 char url[ ]="api.thingspeak.com/update?api_key=PHRFH37I50UK9MGF&field1=20.50";
+
+unsigned long lastConnectionTime = 0;         // last time you connected to the server, in milliseconds
+const unsigned long postingInterval = 15000L; // delay between updates, in milliseconds
+
 
 void setup()
 {
@@ -50,44 +53,24 @@ void setup()
   
   while( (sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500) || 
             sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500)) == 0 );
-			
-  /* sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n", "OK\r\n", TIMEOUT);
-  snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);
-  sendATcommand(aux_str, "OK\r\n", TIMEOUT);
-  
-  attempts = 0; //tries 3 times or get on the loop until sendATcommand != 0
-  while (sendATcommand("AT+SAPBR=1,1\r\n", "OK\r\n", TIMEOUT) == 0)
-  {
-	delay(5000);
-	attempts = attempts + 1;
-	if(attempts > 2)
-	{
-		restartPhoneActivity();
-		attempts = 0;
-	}
-  } */
-  
+
   sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n", "OK\r\n", TIMEOUT);//sets Contype
   snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);//sets APN
   sendATcommand(aux_str, "OK\r\n", TIMEOUT);
   
   connectToNetwork();
-  
-  /* while (sendATcommand("AT+HTTPINIT\r\n", "OK\r\n", TIMEOUT) == 0)
-  {
-	restartPhoneActivity();
-	connectToNetwork();
-  } */
-  
   initHTTPSession();
   HTTPRequest();
   
-  Serial.println("Passed");
 }
  
 void loop() 
 {
-	
+	// if 15 seconds have passed since your last connection,
+  // then connect again and send data
+  if (millis() - lastConnectionTime > postingInterval) {
+    HTTPRequest();
+  }
 }
 
 /////////////////////////////////////////////////////////
@@ -100,12 +83,6 @@ int8_t sendATcommand(const char* ATcommand, const char* expected_answer1, unsign
   memset(response, '\0', 100);    // Initialize the string
 
   delay(100);
-
-  //while ( Serial.available() > 0) Serial.read();   // Clean the input buffer
-
-  //  while(Serial.available()) { //Cleans the input buffer
-  //        Serial.read();
-  //    }
 
   while (serialSIM800.available())
   { //Cleans the input buffer
@@ -173,13 +150,6 @@ void power_on()
 /////////////////////////////////////////////////////////
 void restartPhoneActivity()
 {
-	/*answer = 0;
-	while(answer == 0)
-	{
-		sendATcommand("AT+CFUN=0\r\n", "OK\r\n", TIMEOUT);
-	    delay(5000);
-		answer = sendATcommand("AT+CFUN=1\r\n", "Call Ready\r\n", TIMEOUT);
-	}*/
 	do
 	{
 		sendATcommand("AT+CFUN=0\r\n", "OK\r\n", TIMEOUT);
@@ -214,12 +184,10 @@ void initHTTPSession()
 /////////////////////////////////////////////////////////
 void HTTPRequest()
 {
-	//snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);//sets APN
 	snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
 	sendATcommand(aux_str, "OK\r\n", TIMEOUT);
 	delay(3000);
 	attempts = 0;//tries 3 times or gets on the loop until sendATcommand != 0
-    //while (sendATcommand("AT+HTTPACTION=0\r\n", "200", TIMEOUT) == 0)WORKSSSS+HTTPACTION: 0,200,
 	while (sendATcommand("AT+HTTPACTION=0\r\n", "+HTTPACTION: 0,200,", TIMEOUT) == 0)
     {
 		delay(5000);
@@ -232,25 +200,11 @@ void HTTPRequest()
 			initHTTPSession();
 			snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
 			sendATcommand(aux_str, "OK\r\n", TIMEOUT);
-			//while(sendATcommand(aux_str, "OK\r\n", TIMEOUT) == 0);
 			attempts = 0;
 		}
-    } 
+    }
+	Serial.println("Successfully uploaded");
+	// note the time that the connection was made
+    lastConnectionTime = millis();
 	
-	/* sendATcommand("AT+HTTPPARA=\"URL\",\"api.thingspeak.com/channels/273829/status.json\"\r\n","OK\r\n", TIMEOUT);
-	attempts = 0;//tries 3 times or gets on the loop until sendATcommand != 0
-	 while(answer = sendATcommand("AT+HTTPACTION=0\r\n", "UYR\r\n", TIMEOUT) == 0);
-    {
-		Serial.println(answer);
-		delay(5000);
-		attempts = attempts + 1;
-		Serial.print("attempts: ");
-		Serial.println(attempts);
-		if(attempts > 2)
-		{
-			restartPhoneActivity();
-			connectToNetwork();
-			attempts = 0;
-		} 
-    } */
 }
