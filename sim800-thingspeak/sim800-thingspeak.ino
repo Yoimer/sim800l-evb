@@ -24,9 +24,10 @@ int x = 0;
 int attempts;
 
 char apn[] = "internet.movistar.ve";
-//char apn[] = "www";
 
- 
+//char url[ ]="test.libelium.com/test-get-post.php?a=1&b=2";
+char url[ ]="api.thingspeak.com/update?api_key=PHRFH37I50UK9MGF&field1=20.50";
+
 void setup()
 {
   
@@ -44,6 +45,8 @@ void setup()
   power_on();
 
   delay(3000);
+  
+  //Serial.println("AT+HTTPPARA=\"URL\",\"www.castillolk.com.ve/WhiteList.txt\"\r\n");
   
   while( (sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500) || 
             sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500)) == 0 );
@@ -77,6 +80,7 @@ void setup()
   } */
   
   initHTTPSession();
+  HTTPRequest();
   
   Serial.println("Passed");
 }
@@ -206,4 +210,47 @@ void initHTTPSession()
 		restartPhoneActivity();
 		connectToNetwork();
    }
+}
+/////////////////////////////////////////////////////////
+void HTTPRequest()
+{
+	//snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);//sets APN
+	snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
+	sendATcommand(aux_str, "OK\r\n", TIMEOUT);
+	delay(3000);
+	attempts = 0;//tries 3 times or gets on the loop until sendATcommand != 0
+    //while (sendATcommand("AT+HTTPACTION=0\r\n", "200", TIMEOUT) == 0)WORKSSSS+HTTPACTION: 0,200,
+	while (sendATcommand("AT+HTTPACTION=0\r\n", "+HTTPACTION: 0,200,", TIMEOUT) == 0)
+    {
+		delay(5000);
+		attempts = attempts + 1;
+		if(attempts > 2)
+		{
+			sendATcommand("AT+HTTPTERM\r\n", "OK\r\n", TIMEOUT);
+			restartPhoneActivity();
+			connectToNetwork();
+			initHTTPSession();
+			snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
+			sendATcommand(aux_str, "OK\r\n", TIMEOUT);
+			//while(sendATcommand(aux_str, "OK\r\n", TIMEOUT) == 0);
+			attempts = 0;
+		}
+    } 
+	
+	/* sendATcommand("AT+HTTPPARA=\"URL\",\"api.thingspeak.com/channels/273829/status.json\"\r\n","OK\r\n", TIMEOUT);
+	attempts = 0;//tries 3 times or gets on the loop until sendATcommand != 0
+	 while(answer = sendATcommand("AT+HTTPACTION=0\r\n", "UYR\r\n", TIMEOUT) == 0);
+    {
+		Serial.println(answer);
+		delay(5000);
+		attempts = attempts + 1;
+		Serial.print("attempts: ");
+		Serial.println(attempts);
+		if(attempts > 2)
+		{
+			restartPhoneActivity();
+			connectToNetwork();
+			attempts = 0;
+		} 
+    } */
 }
