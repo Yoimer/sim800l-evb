@@ -70,6 +70,14 @@ void setup()
   
   connectToNetwork();
   
+  /* while (sendATcommand("AT+HTTPINIT\r\n", "OK\r\n", TIMEOUT) == 0)
+  {
+	restartPhoneActivity();
+	connectToNetwork();
+  } */
+  
+  initHTTPSession();
+  
   Serial.println("Passed");
 }
  
@@ -189,4 +197,13 @@ void connectToNetwork()
 			attempts = 0;
 		}
     } 
+}
+/////////////////////////////////////////////////////////
+void initHTTPSession()
+{
+	while (sendATcommand("AT+HTTPINIT\r\n", "OK\r\n", TIMEOUT) == 0)
+    {
+		restartPhoneActivity();
+		connectToNetwork();
+   }
 }
