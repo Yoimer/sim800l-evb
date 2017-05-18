@@ -48,11 +48,11 @@ void setup()
   while( (sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500) || 
             sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500)) == 0 );
 			
-  sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n", "OK\r\n", TIMEOUT);
+  /* sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n", "OK\r\n", TIMEOUT);
   snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);
   sendATcommand(aux_str, "OK\r\n", TIMEOUT);
   
-  attempts = 0; //tries 3 times
+  attempts = 0; //tries 3 times or get on the loop until sendATcommand != 0
   while (sendATcommand("AT+SAPBR=1,1\r\n", "OK\r\n", TIMEOUT) == 0)
   {
 	delay(5000);
@@ -62,8 +62,13 @@ void setup()
 		restartPhoneActivity();
 		attempts = 0;
 	}
-  }
+  } */
   
+  sendATcommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n", "OK\r\n", TIMEOUT);//sets Contype
+  snprintf(aux_str, sizeof(aux_str), "AT+SAPBR=3,1,\"APN\",\"%s\"\r\n", apn);//sets APN
+  sendATcommand(aux_str, "OK\r\n", TIMEOUT);
+  
+  connectToNetwork();
   
   Serial.println("Passed");
 }
@@ -169,4 +174,19 @@ void restartPhoneActivity()
 		delay(2000);
 		answer = sendATcommand("AT+CFUN=1\r\n", "Call Ready\r\n", TIMEOUT);
 	}while(answer == 0);
-} 
+}
+/////////////////////////////////////////////////////////
+void connectToNetwork()
+{
+	attempts = 0;//tries 3 times or gets on the loop until sendATcommand != 0
+	while (sendATcommand("AT+SAPBR=1,1\r\n", "OK\r\n", TIMEOUT) == 0)
+    {
+		delay(5000);
+		attempts = attempts + 1;
+		if(attempts > 2)
+		{
+			restartPhoneActivity();
+			attempts = 0;
+		}
+    } 
+}
