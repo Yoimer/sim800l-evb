@@ -25,7 +25,9 @@ int attempts;
 
 char apn[] = "internet.movistar.ve";
 
-char url[ ]="api.thingspeak.com/update?api_key=PHRFH37I50UK9MGF&field1=20.50";
+//char url[ ]="api.thingspeak.com/update?api_key=PHRFH37I50UK9MGF&field1=20.50";
+char url[ ]="api.thingspeak.com/update?api_key=PHRFH37I50UK9MGF&field1=";
+
 
 unsigned long lastConnectionTime = 0;         // last time you connected to the server, in milliseconds
 const unsigned long postingInterval = 15000L; // delay between updates, in milliseconds
@@ -45,6 +47,7 @@ void setup()
   delay(1000);
    
   Serial.println("Starting...");
+  
   power_on();
 
   delay(3000);
@@ -187,7 +190,12 @@ void initHTTPSession()
 /////////////////////////////////////////////////////////
 void HTTPRequest()
 {
-	snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
+
+	////snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\"%f\"\r\n", url, light);
+	float light = readLDR();
+	char sensorValue[6];
+	dtostrf(light,5,2,sensorValue);
+	snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\%s\"\r\n", url, sensorValue);
 	sendATcommand(aux_str, "OK\r\n", TIMEOUT);
 	delay(3000);
 	attempts = 0;//tries 3 times or gets on the loop until sendATcommand != 0
@@ -202,7 +210,11 @@ void HTTPRequest()
 			restartPhoneActivity();
 			connectToNetwork();
 			initHTTPSession();
-			snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
+			////snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url);
+			light = readLDR();
+			char sensorValue[6];
+			dtostrf(light,5,2,sensorValue);
+			snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\%s\"\r\n", url, sensorValue);
 			sendATcommand(aux_str, "OK\r\n", TIMEOUT);
 			attempts = 0;
 		}
@@ -211,4 +223,15 @@ void HTTPRequest()
 	// note the time that the connection was made
     lastConnectionTime = millis();
 	
+}
+/////////////////////////////////////////////////////////
+float readLDR()
+{
+  //read the input on analog pin 0:
+  int sensorValue = analogRead(A0);
+  //Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
+  float voltage = sensorValue * (5.0 / 1023.0);
+  // print out the value you read:
+  Serial.println(voltage);
+  return voltage;
 }
