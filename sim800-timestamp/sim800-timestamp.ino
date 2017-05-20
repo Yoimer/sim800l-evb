@@ -52,8 +52,8 @@ void setup()
 
   delay(3000);
   
-  while( (sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500) || 
-            sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500)) == 0 );  //*PSUTTZ
+  while( (sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500, 0) || 
+            sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500, 0)) == 0 );  //*PSUTTZ
 			
   restartPhoneActivity();
   Serial.println("Passed!");
@@ -65,7 +65,7 @@ void loop()
 }
 
 /////////////////////////////////////////////////////////
-int8_t sendATcommand(const char* ATcommand, const char* expected_answer1, unsigned int timeout) {
+int8_t sendATcommand(const char* ATcommand, const char* expected_answer1, unsigned int timeout, int print_response) {
 
   uint8_t x = 0,  answer = 0;
   char response[100];
@@ -102,6 +102,10 @@ int8_t sendATcommand(const char* ATcommand, const char* expected_answer1, unsign
       if (strstr(response, expected_answer1) != NULL)
       {
         answer = 1;
+		if (print_response == 1)
+		{
+			Serial.println(response);
+		}
       }
     }
     // Waits for the asnwer with time out
@@ -120,7 +124,7 @@ void power_on()
   Serial.println("On Power_on...");
 
   // checks if the module is started
-  answer = sendATcommand("AT\r\n", "OK\r\n", TIMEOUT);
+  answer = sendATcommand("AT\r\n", "OK\r\n", TIMEOUT, 0);
   if (answer == 0)
   {
     // power on pulse
@@ -132,7 +136,7 @@ void power_on()
     while (answer == 0)
   {
       // Send AT every two seconds and wait for the answer
-      answer = sendATcommand("AT\r\n", "OK\r\n", TIMEOUT);
+      answer = sendATcommand("AT\r\n", "OK\r\n", TIMEOUT, 0);
       Serial.println("Trying connection with module...");
     }
   }
@@ -143,22 +147,19 @@ void restartPhoneActivity()
 {
   do
   {
-    sendATcommand("AT+CFUN=0\r\n", "OK\r\n", TIMEOUT);
+    sendATcommand("AT+CFUN=0\r\n", "OK\r\n", TIMEOUT, 0);
     delay(2000);
-	sendATcommand("AT+CLTS=1\r\n", "OK\r\n", TIMEOUT);
+	sendATcommand("AT+CLTS=1\r\n", "OK\r\n", TIMEOUT, 0); // request time stamp to network
 	delay(2000);
-    answer = sendATcommand("AT+CFUN=1\r\n", "Call Ready\r\n", (2 * TIMEOUT));
+    answer = sendATcommand("AT+CFUN=1\r\n", "Call Ready\r\n", (2 * TIMEOUT), 0);
 	if (answer == 1)
 	{
 		Serial.println("Waiting time conf...");
-		answer = sendATcommand("", "*PSUTTZ:", (5 * TIMEOUT));
+		answer = sendATcommand("", "*PSUTTZ:", (5 * TIMEOUT), 0); // wait for time stamp from network
 	}
    
   }while(answer == 0);
   
+  sendATcommand("AT+CCLK?\r\n", "OK\r\n", TIMEOUT, 1); // get time stamp from network
 }
 /////////////////////////////////////////////////////////
-
-/*while((sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500) || 
-         sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500)) == 0 );
-		 *PSNWID,*PSUTTZ:,+CTZV:, DST*/
