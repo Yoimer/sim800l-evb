@@ -229,13 +229,10 @@ void initHTTPSession()
 /////////////////////////////////////////////////////////
 void HTTPRequest()
 {
-	//url[ledStatus];
-	//snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\%s\"\r\n", url);
-	
 	char const * const url[]=
 			{
-	          "api.thingspeak.com/update?api_key=PHRFH37I50UK9MGF&field1=0",
-              "api.thingspeak.com/update?api_key=PHRFH37I50UK9MGF&field1=1",
+	          "blynk-cloud.com/fdbaed2437134895a352412f0af64190/update/v0?value=0",
+              "blynk-cloud.com/fdbaed2437134895a352412f0af64190/update/v0?value=255",
             };
 			
 	snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url[ledStatus]);
@@ -253,13 +250,6 @@ void HTTPRequest()
 			restartPhoneActivity();
 			connectToNetwork();
 			initHTTPSession();
-			/* light = readLDR();
-			char sensorValue[6];
-			dtostrf(light,5,2,sensorValue); */
-			//char relaystate[2];
-	        //itoa(ledStatus, relaystate, 2);
-			//snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\%s\"\r\n", url, url[ledStatus]);
-			//snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\%s\"\r\n", url[ledStatus]);
 			snprintf(aux_str, sizeof(aux_str), "AT+HTTPPARA=\"URL\",\"%s\"\r\n", url[ledStatus]);
 			sendATcommand(aux_str, "OK\r\n", TIMEOUT);
 			attempts = 0;
@@ -270,18 +260,7 @@ void HTTPRequest()
     lastConnectionTime = millis();
 	
 }
-/////////////////////////////////////////////////////////
-/* float readLDR()
-{
-  //read the input on analog pin 0:
-  int sensorValue = analogRead(A0);
-  //Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
-  float voltage = sensorValue * (5.0 / 1023.0);
-  // print out the value you read:
-  Serial.println(voltage);
-  return voltage;
-}
-//////////// *//////////////////////////////////////////////
+
 void SMSandCallSettings()
 {
 	sendATcommand("AT+CMGF=1\r\n", "OK\r\n", TIMEOUT); // SMS Text mode
