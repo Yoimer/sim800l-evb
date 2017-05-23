@@ -22,34 +22,17 @@
  *  Implementation:    Luis Miguel Martí
  */
 
-
-// #define HEATING 9
-// #define COOLING 10
-
-#define LED 13
-
-//Temperature control
-//int cnt; //counter
-//float tdegrees; //
-//int sensorPin = A0; // input for the thermistor
-//int sensorValue = 0; // voltage value from voltage divider
+#define LED 13 // led on pin 13
 
 int8_t answer;
 int x;
 int onModulePin = 2;
 char SMS[200];
-char aux_string[30];
-char phone_number[] = "*********"; //phone number to send SMS
+////char aux_string[30];
+////char phone_number[] = "*********"; //phone number to send SMS
 char received[200];
 char message1[] = {"LED ON"};
 char message2[] = {"LED OFF"};
-//char message3[] = {"HEATING ON"};
-//char message4[] = {"HEATING OFF"};
-//char message5[] = {"TEMP"};
-//char message6[] = {"Temp: "};
-//char coma[] = {","};
-//char deg[] = {" Celsius degrees"};
-
 
 void setup()   {
   
@@ -82,20 +65,57 @@ void loop()
       received[i] = Serial.read();
     }
 	
+	 /* Example of SMS
+	 CMT: "+584168262667","2","17/05/09,14:14:46-16"
+     LED OFF
+	 
+	 "+584168262667"         sender number
+	  ,"2",                  name registered previously on sim, in this case the name is 2
+	  ,"",                   case when sender is not registered
+	  "17/05/09,14:14:46-16" date, hour and time zone
+	  */
+	 
+    //SMS comes after first line char ('\n') so discard all bytes until find it
+	// at the same time let's find out whether sender is registered or not
 	
 	 byte i = 0;
-      //SMS comes after quotes ('\n') so discard all bytes until find it
-     while (received[i] != '\n') i++;
+	 byte char_counter = 0;
+	 byte first_comma = 0;
+	 byte second_comma = 0;
+	 byte comma_counter = 0;
+     while (received[i] != '\n')
+	 {
+		char_counter++;
+		if(received[i] == ',')
+		{
+			comma_counter++;
+			switch(comma_counter)
+			{
+				case 1:
+				 first_comma = char_counter;
+				 Serial.println(first_comma);
+				 break;
+				case 2:
+				 second_comma = char_counter;
+				 Serial.println(second_comma);
+				 break;
+			}
+		}
+		i++;
+	 }
+	 
      i++;
 	 byte z = 0;
+	 //reads sms
 	 while (char(received[i]) != '\n') {
       SMS[z] = received[i];
       Serial.print(SMS[z]);
 	  i++;
       z++;
 	 }
-	 
-	Serial.println(); //prints space
+	//prints space
+	Serial.println();
+	//checks SMS content
     byte message = checkSMS();
 
     switch (message) {
