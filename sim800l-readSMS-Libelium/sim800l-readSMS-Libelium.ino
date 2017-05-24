@@ -109,10 +109,29 @@ void loop()
 	
 	//SMS comes after quotes ('\n') so discard all bytes until find it
 	byte i = 0;
+	byte first_comma = 0;
+	byte second_comma = 0;
+	byte comma_counter = 0;
 	while (char(received[i]) != '\n')
 	{
+		if(char(received[i]) == ',')
+		{
+			comma_counter++;
+			switch(comma_counter)
+			{
+				case 1:
+				 first_comma = i;
+				 Serial.println(first_comma);
+				 break;
+				case 2:
+				 second_comma = i;
+				 Serial.println(second_comma);
+				 break;
+            }
+		}
 		i++;
 	}
+	Serial.println(second_comma - first_comma);
 	//Serial.println(i);
 	i++;
 	//byte z = 47;
