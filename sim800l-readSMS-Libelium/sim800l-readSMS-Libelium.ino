@@ -23,32 +23,17 @@
  */
 
 
-// #define HEATING 9
-// #define COOLING 10
 
 #define LED 13
-
-//Temperature control
-//int cnt; //counter
-//float tdegrees; //
-//int sensorPin = A0; // input for the thermistor
-//int sensorValue = 0; // voltage value from voltage divider
 
 int8_t answer;
 int x;
 int onModulePin = 2;
 char SMS[200];
-char aux_string[30];
-char phone_number[] = "*********"; //phone number to send SMS
 char received[200];
 char message1[] = {"LED ON"};
 char message2[] = {"LED OFF"};
-//char message3[] = {"HEATING ON"};
-//char message4[] = {"HEATING OFF"};
-//char message5[] = {"TEMP"};
-//char message6[] = {"Temp: "};
-//char coma[] = {","};
-//char deg[] = {" Celsius degrees"};
+
 
 
 void setup()   {
@@ -121,18 +106,21 @@ void loop()
 			{
 				case 1:
 				 first_comma = i;
-				 Serial.println(first_comma);
+				 //Serial.println(first_comma); uncomment for debugging
 				 break;
 				case 2:
 				 second_comma = i;
-				 Serial.println(second_comma);
+				 //Serial.println(second_comma); uncomment for debugging
 				 break;
             }
 		}
 		i++;
 	}
-	Serial.println(second_comma - first_comma);
-	//Serial.println(i);
+	Serial.println(second_comma - first_comma); 
+	
+	if (second_comma - first_comma > 3) // only registered on sim will access
+	{
+		//Serial.println(i);
 	i++;
 	//byte z = 47;
 	byte z = i;
@@ -166,8 +154,9 @@ void loop()
     }
   }
 
-}
+ }
 
+}
 
 void power_on() {
 
