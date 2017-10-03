@@ -88,7 +88,25 @@ void setup() {
   
 }
 
-void loop() {
+
+
+//**********************************************************
+
+// Programa Principal
+void loop()
+{
+  if (Serial.available() > 0)
+  {
+    char lastCharRead = Serial.read();
+    if (lastCharRead == '\r' || lastCharRead == '\n')
+    {
+      endOfLineReached();
+    }
+    else
+    {
+      currentLine[currentLineIndex++] = lastCharRead;
+    }
+  }
 }
 
 //**********************************************************
@@ -158,3 +176,153 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
   while ((answer == 0) && ((millis() - previous) < timeout));
   return answer;
 }
+
+//**********************************************************
+// Función que lee el fin de linea en el puerto serial
+
+void endOfLineReached()
+
+{
+  lastLine = String(currentLine);
+
+  // Comprueba que se está recibiendo una llamada
+  if (lastLine.startsWith("RING"))                                   // New incoming call
+  {
+    Serial.println(lastLine);
+    nextValidLineIsCall = true;
+  }
+  else
+  {
+    if ((lastLine.length() > 0) && (nextValidLineIsCall))        // Rejects any empty line
+    {
+      //LastLineIsCLIP();
+    }
+	// Comprueba que se está recibiendo un SMS
+    else if (lastLine.startsWith("+CMT:"))                          // New incoming SMS
+    {
+      // Imprime SMS recibido completo
+	  // Incluye el número que envía el mensaje
+	  Serial.println(lastLine);
+
+	  // Extrae número telefónico
+      phonenum = lastLine.substring((lastLine.indexOf(34) + 1),
+                                    lastLine.indexOf(34, lastLine.indexOf(34) + 1));
+      nextLineIsMessage = true;
+      firstComma        = lastLine.indexOf(',');
+      secondComma       = lastLine.indexOf(',', firstComma  + 1);
+      thirdComma        = lastLine.indexOf(',', secondComma + 1);
+      forthComma        = lastLine.indexOf(',', thirdComma  + 1);
+      fifthComma        = lastLine.indexOf(',', forthComma  + 1);
+      PhoneCalling      = lastLine.substring((firstComma - 12), (firstComma - 1));
+      PhoneCallingIndex = lastLine.substring((firstComma + 2), (secondComma - 1));
+      Serial.println(phonenum);        ////////////////////////////////////////////
+      Serial.println(PhoneCallingIndex);
+      j            = PhoneCallingIndex.toInt();
+      isIncontact  = false;
+      isAuthorized = false;
+	  
+	  // Confirma registro y autorización
+      if (j > 0)
+      {
+        isIncontact = true;
+        Serial.println("en phonebook"); //////////////////////////////////////////////
+        if (j <= 5 )
+        {
+          Serial.println("autorizada"); //////////////////////////////////////////////
+          isAuthorized = true;
+        }
+      }
+      else
+      {
+      }
+    }
+    else if ((lastLine.length() > 0) && (nextLineIsMessage))
+    {
+      // Procesa SMS
+	  LastLineIsCMT();
+    }
+  }
+  // Limpia buffer
+  CleanCurrentLine();
+}
+
+//**********************************************************
+
+// Función que limpia línea
+
+void CleanCurrentLine()
+
+{
+  for ( int i = 0; i < sizeof(currentLine);  ++i )
+  {
+    currentLine[i] = (char)0;
+  }
+  currentLineIndex = 0;
+}
+
+
+//**********************************************************
+
+// Función que procesa el SMS
+
+void LastLineIsCMT()
+{
+  // Solo el contenido del SMS
+  Serial.println(lastLine);
+  
+  clearBuffer();
+  if (isIncontact)
+  {
+    // SMS para encender equipo
+	if (lastLine.indexOf("LED ON") >= 0)
+    {
+      // logica inversa
+	  ////prendeapaga(0);
+    }
+	// SMS para apagar equipo
+    else if (lastLine.indexOf("LED OFF") >= 0)
+    {
+	  // logica inversa
+      ////prendeapaga(1);
+    }
+	// SMS para registrar usuario
+    else if (lastLine.indexOf("ADD") >= 0)
+    {
+      ////DelAdd(1);
+    }
+	// SMS para eliminar usuario
+    else if (lastLine.indexOf("DEL") >= 0)
+    {
+      ////DelAdd(2);
+    }
+    else
+    {
+      clearBuffer();
+    }
+  }
+  CleanCurrentLine();
+  nextLineIsMessage = false;
+}
+
+// Función que limpia todo el buffer
+
+void clearBuffer()
+{
+  byte w = 0;
+  for (int i = 0; i < 10; i++)
+  {
+    while (Serial.available() > 0)
+    {
+      char k = Serial.read();
+      w++;
+      delay(1);
+    }
+    delay(1);
+  }
+}
+
+//**********************************************************
+
+
+
+
