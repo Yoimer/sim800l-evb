@@ -81,9 +81,13 @@ void setup()
     while( (sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500, 0) || 
             sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500, 0)) == 0 );
 
-    Serial.println("Passed!");
+    sendATcommand("AT+CMGF=1\r\n", "OK\r\n", 5000, 0);
+    sendATcommand("AT+CNMI=1,2,0,0,0\r\n", "OK\r\n", 5000, 0);
+    sendATcommand("AT+CPBR=1,1\r\n", "OK\r\n", 5000, 1);
+    Serial.println("Password:");
+    Serial.println(Password);
 
-    sendSMS("04129501619", "YOIMER");
+    //sendSMS("04168262667", "YOIMER");
 
 }
 
