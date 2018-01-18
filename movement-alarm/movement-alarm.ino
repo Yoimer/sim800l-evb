@@ -82,6 +82,9 @@ void setup()
             sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500, 0)) == 0 );
 
     Serial.println("Passed!");
+
+    sendSMS("04129501619", "YOIMER");
+
 }
 
 void loop() {
@@ -127,7 +130,7 @@ int8_t sendATcommand(char* ATcommand, char* expected_answer, unsigned int timeou
     serialSIM800.read();
   }
 
-  serialSIM800.println(ATcommand);
+  Serial.println(ATcommand);
   serialSIM800.write(ATcommand); // Sends the AT command
 
   x = 0;
@@ -191,3 +194,46 @@ void power_on()
 }
 
 /////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////
+int sendSMS(char *phone_number, char *sms_text)
+
+{
+  char aux_string[30];
+  //char phone_number[] = "04168262667"; // ********* is the number to call
+  //char sms_text[] = "Test-Arduino-Hello World";
+  Serial.println("Setting SMS mode...");
+  sendATcommand("AT+CMGF=1\r\n", "OK\r\n", 5000, 0);   // sets the SMS mode to text
+  Serial.println("Sending SMS");
+
+  sprintf(aux_string, "AT+CMGS=\"%s\"\r\n", phone_number);
+  answer = sendATcommand(aux_string, ">", 20000, 0);   // send the SMS number
+  if (answer == 1)
+     {
+       //Serial.println(sms_text);
+       serialSIM800.write(sms_text);
+       serialSIM800.write(0x1A);
+       answer = sendATcommand("", "OK\r\n", 20000, 0);
+       if (answer == 1)
+          {
+            Serial.println("Sent ");
+          }
+       else
+          {
+            Serial.println("error ");
+          }
+     }
+  else
+     {
+       Serial.println("error ");
+       Serial.println(answer, DEC);
+     }
+  return answer;
+}
+
+
+
+
+
+
+
