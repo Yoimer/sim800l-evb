@@ -95,6 +95,18 @@ void loop() {
 
     // check movement
     //CheckUltrasoundSensor();
+    if (serialSIM800.available() > 0)
+    {
+        char lastCharRead = serialSIM800.read();
+        if (lastCharRead == '\r' || lastCharRead == '\n')
+        {
+            endOfLineReached();
+        }
+        else
+        {
+            currentLine[currentLineIndex++] = lastCharRead;
+        }
+    }
 }
 
 ////////////////////////////////////////////////////
@@ -235,9 +247,123 @@ int sendSMS(char *phone_number, char *sms_text)
   return answer;
 }
 
+void endOfLineReached()
+/////////////////////////////////////////////////////////////////////////////
+{
+  lastLine = String(currentLine);
 
+  if (lastLine.startsWith("RING"))
+  {
+    Serial.println(lastLine);
+    nextValidLineIsCall = true;
+  }
+  else
+  {
+    if ((lastLine.length() > 0) && (nextValidLineIsCall))
+    {
+      //LastLineIsCLIP();
+    }
+    else if (lastLine.startsWith("+CMT:"))
+    {
+      Serial.println(lastLine);
+      phonenum = lastLine.substring((lastLine.indexOf(34) + 1),
+                                    lastLine.indexOf(34, lastLine.indexOf(34) + 1));
+      nextLineIsMessage = true;
+      firstComma        = lastLine.indexOf(',');
+      secondComma       = lastLine.indexOf(',', firstComma  + 1);
+      thirdComma        = lastLine.indexOf(',', secondComma + 1);
+      forthComma        = lastLine.indexOf(',', thirdComma  + 1);
+      fifthComma        = lastLine.indexOf(',', forthComma  + 1);
+      PhoneCalling      = lastLine.substring((firstComma - 12), (firstComma - 1));
+      PhoneCallingIndex = lastLine.substring((firstComma + 2), (secondComma - 1));
+      Serial.println(phonenum);
+      //Serial.println(PhoneCalling);
+      //Serial.println(PhoneCallingIndex);
+      j            = PhoneCallingIndex.toInt();
+      isIncontact  = false;
+      isAuthorized = false;
+      if (j > 0)
+      {
+        isIncontact = true;
+        Serial.println("en phonebook");
+        if (j <= 5 )
+        {
+          Serial.println("autorizada");
+          isAuthorized = true;
+        }
+      }
+      else
+      {
+      }
+    }
+    else if ((lastLine.length() > 0) && (nextLineIsMessage))
+    {
+      LastLineIsCMT();
+    }
+  }
+  CleanCurrentLine();
+}
+/////////////////////////////////////////////////////////////////////
 
+void LastLineIsCMT()
+/////////////////////////////////////////////////////////////////////
+{
+  Serial.println(lastLine);
+  clearBuffer();
+  if (isIncontact)
+  {
+    if (lastLine.indexOf("LED ON") >= 0)
+    {
+      //prendeapaga(0);
+    }
+    else if (lastLine.indexOf("LED OFF") >= 0)
+    {
+      //prendeapaga(1);
+    }
+    else if (lastLine.indexOf("ADD") >= 0)
+    {
+      //DelAdd(1);
+    }
+    else if (lastLine.indexOf("DEL") >= 0)
+    {
+      //DelAdd(2);
+    }
+    else
+    {
+      clearBuffer();
+    }
+  }
+  CleanCurrentLine();
+  nextLineIsMessage = false;
 
+}
+////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////
+void CleanCurrentLine()
+{
+  for ( int i = 0; i < sizeof(currentLine);  ++i )
+  {
+    currentLine[i] = (char)0;
+  }
+  currentLineIndex = 0;
+}
+//////////////////////////////////////////////////////////////////////
 
-
+//////////////////////////////////////////////////////////////////////
+void clearBuffer()
+/////////////////////////////////////////////////////////////////////////////
+{
+  byte w = 0;
+  for (int i = 0; i < 10; i++)
+  {
+    while (serialSIM800.available() > 0)
+    {
+      char k = serialSIM800.read();
+      w++;
+      delay(1);
+    }
+    delay(1);
+  }
+}
+/////////////////////////////////////////////////////////////////////////////
