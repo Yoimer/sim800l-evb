@@ -39,8 +39,6 @@ bool nextValidLineIsCall                                                = false;
 String PhoneCallingIndex                                                = "";
 String PhoneCalling                                                     = "";
 String OldPhoneCalling                                                  = "";
-String DateandHour                                                      = "";
-String AnalogInput                                                      = "";
 String lastLine                                                         = "";
 String phonenum                                                         = "";
 int firstComma                                                          = -1;
@@ -62,7 +60,7 @@ int i                                                                   = -1;
 int f                                                                   = -1;
 int r                                                                   =  0;
 bool isInPhonebook                                                      = false;
-char contact[13];
+char phone[21];
 
 void setup()
 {
@@ -78,6 +76,7 @@ void setup()
     power_on();
     delay(3000);
 
+    pinMode(LED_BUILTIN, OUTPUT);
     while( (sendATcommand("AT+CREG?\r\n", "+CREG: 0,1\r\n", 500, 0) || 
             sendATcommand("AT+CREG?\r\n", "+CREG: 0,5\r\n", 500, 0)) == 0 );
 
@@ -94,7 +93,8 @@ void setup()
 void loop() {
 
     // check movement
-    //CheckUltrasoundSensor();
+    CheckUltrasoundSensor();
+
     if (serialSIM800.available() > 0)
     {
         char lastCharRead = serialSIM800.read();
@@ -226,7 +226,7 @@ int sendSMS(char *phone_number, char *sms_text)
   answer = sendATcommand(aux_string, ">", 20000, 0);   // send the SMS number
   if (answer == 1)
      {
-       //Serial.println(sms_text);
+       Serial.println(sms_text);
        serialSIM800.write(sms_text);
        serialSIM800.write(0x1A);
        answer = sendATcommand("", "OK\r\n", 20000, 0);
@@ -312,9 +312,11 @@ void LastLineIsCMT()
   clearBuffer();
   if (isIncontact)
   {
-    if (lastLine.indexOf("LED ON") >= 0)
+    if (lastLine.indexOf("999") >= 0)
     {
-      //prendeapaga(0);
+        digitalWrite(LED_BUILTIN, HIGH);
+        phonenum.toCharArray(phone, 21);
+        sendSMS(phone, "activada");
     }
     else if (lastLine.indexOf("LED OFF") >= 0)
     {
