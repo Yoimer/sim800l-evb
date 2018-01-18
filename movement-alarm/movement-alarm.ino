@@ -61,7 +61,7 @@ int f                                                                   = -1;
 int r                                                                   =  0;
 bool isInPhonebook                                                      = false;
 char phone[21];
-
+int alarma                                                              = 0;
 void setup()
 {
     pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
@@ -314,13 +314,17 @@ void LastLineIsCMT()
   {
     if (lastLine.indexOf("999") >= 0)
     {
+        alarma = 1;
         digitalWrite(LED_BUILTIN, HIGH);
         phonenum.toCharArray(phone, 21);
         sendSMS(phone, "activada");
     }
-    else if (lastLine.indexOf("LED OFF") >= 0)
+    else if (lastLine.indexOf("000") >= 0)
     {
-      //prendeapaga(1);
+        alarma = 0;
+        digitalWrite(LED_BUILTIN, LOW);
+        phonenum.toCharArray(phone, 21);
+        sendSMS(phone, "desactivada");
     }
     else if (lastLine.indexOf("ADD") >= 0)
     {
