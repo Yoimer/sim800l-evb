@@ -83,11 +83,9 @@ void setup()
     sendATcommand("AT+CMGF=1\r\n", "OK\r\n", 5000, 0);
     sendATcommand("AT+CNMI=1,2,0,0,0\r\n", "OK\r\n", 5000, 0);
     sendATcommand("AT+CPBR=1,1\r\n", "OK\r\n", 5000, 1);
+    sendATcommand("AT+CLIP=1\r\n", "OK\r\n", 5000, 0);
     Serial.println("Password:");
     Serial.println(Password);
-
-    //sendSMS("04168262667", "YOIMER");
-
 }
 
 void loop() {
@@ -107,6 +105,7 @@ void loop() {
             currentLine[currentLineIndex++] = lastCharRead;
         }
     }
+    //clearBuffer();
 }
 
 ////////////////////////////////////////////////////
@@ -129,7 +128,8 @@ void CheckUltrasoundSensor()
 
     // Prints the distance on the Serial Monitor
     Serial.print("Distance is: ");
-    Serial.println(distance);
+    ////Serial.println(distance);
+    Serial.println(distance, DEC);
 }
 
 ////////////////////////////////////////////////////
@@ -216,33 +216,31 @@ int sendSMS(char *phone_number, char *sms_text)
 
 {
   char aux_string[30];
-  //char phone_number[] = "04168262667"; // ********* is the number to call
-  //char sms_text[] = "Test-Arduino-Hello World";
   Serial.println("Setting SMS mode...");
   sendATcommand("AT+CMGF=1\r\n", "OK\r\n", 5000, 0);   // sets the SMS mode to text
-  Serial.println("Sending SMS");
+  ////Serial.println("Sending SMS");
 
   sprintf(aux_string, "AT+CMGS=\"%s\"\r\n", phone_number);
   answer = sendATcommand(aux_string, ">", 20000, 0);   // send the SMS number
   if (answer == 1)
      {
-       Serial.println(sms_text);
+       ////Serial.println(sms_text);
        serialSIM800.write(sms_text);
        serialSIM800.write(0x1A);
        answer = sendATcommand("", "OK\r\n", 20000, 0);
        if (answer == 1)
           {
-            Serial.println("Sent ");
+            ////Serial.println("Sent ");
           }
        else
           {
-            Serial.println("error ");
+            ////Serial.println("error ");
           }
      }
   else
      {
-       Serial.println("error ");
-       Serial.println(answer, DEC);
+       ////Serial.println("error ");
+       ////Serial.println(answer, DEC);
      }
   return answer;
 }
@@ -261,7 +259,7 @@ void endOfLineReached()
   {
     if ((lastLine.length() > 0) && (nextValidLineIsCall))
     {
-      //LastLineIsCLIP();
+      LastLineIsCLIP();
     }
     else if (lastLine.startsWith("+CMT:"))
     {
@@ -277,9 +275,7 @@ void endOfLineReached()
       PhoneCalling      = lastLine.substring((firstComma - 12), (firstComma - 1));
       PhoneCallingIndex = lastLine.substring((firstComma + 2), (secondComma - 1));
       Serial.println(phonenum);
-      //Serial.println(PhoneCalling);
-      //Serial.println(PhoneCallingIndex);
-      j            = PhoneCallingIndex.toInt();
+      j                 = PhoneCallingIndex.toInt();
       isIncontact  = false;
       isAuthorized = false;
       if (j > 0)
@@ -326,14 +322,6 @@ void LastLineIsCMT()
         phonenum.toCharArray(phone, 21);
         sendSMS(phone, "desactivada");
     }
-    else if (lastLine.indexOf("ADD") >= 0)
-    {
-      //DelAdd(1);
-    }
-    else if (lastLine.indexOf("DEL") >= 0)
-    {
-      //DelAdd(2);
-    }
     else
     {
       clearBuffer();
@@ -373,3 +361,48 @@ void clearBuffer()
   }
 }
 /////////////////////////////////////////////////////////////////////////////
+
+//**********************************************************
+
+// Función que procesa llamada telefónica
+
+void LastLineIsCLIP()
+{
+  firstComma         = lastLine.indexOf(',');
+  secondComma        = lastLine.indexOf(',', firstComma + 1);
+  thirdComma         = lastLine.indexOf(',', secondComma + 1);
+  forthComma         = lastLine.indexOf(',', thirdComma + 1);
+  fifthComma         = lastLine.indexOf(',', forthComma + 1);
+  PhoneCalling       = lastLine.substring((firstComma - 12), (firstComma - 1));
+  PhoneCallingIndex  = lastLine.substring((forthComma + 2), (fifthComma - 1));
+  j                  = PhoneCallingIndex.toInt();
+
+  ////Serial.println(PhoneCalling);
+
+  if (PhoneCalling == OldPhoneCalling)
+  {
+    swveces = 1;
+    if ((millis() - xprevious ) > 9000)
+    {
+      swveces   = 0;
+      xprevious = millis();
+    };
+  }
+  else
+  {
+    xprevious       = millis();
+    OldPhoneCalling = PhoneCalling;
+    swveces         = 0;
+  }
+  if (j > 0 & swveces == 0)
+  {
+    digitalWrite(LED_BUILTIN, LOW);
+    PhoneCalling.toCharArray(phone, 21);
+    sendSMS(phone, "desactivada");
+    clearBuffer();
+  }
+  clearBuffer();
+  nextValidLineIsCall = false;
+}
+
+//**********************************************************
